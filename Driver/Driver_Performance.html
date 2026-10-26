@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Driver Performance</title>
+<style>
+:root { --bg:#f5f7fb;--white:#ffffff;--text:#1b2941;--muted:#76849b;--sub:#52637c;--border:#e3eaf1;--teal:#16867f;--teal-dark:#086d65;--blue:#4774d7;--violet:#7564ba;--amber:#bb802e;--red:#d75c62;--navy:#243550;--shadow:0 3px 18px rgba(30,53,84,.035);--radius:17px; }
+* { box-sizing:border-box; } html {scroll-behavior:smooth;} body {margin:0;font-family:"Segoe UI",Inter,-apple-system,BlinkMacSystemFont,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;} button,input,select {font:inherit;} button {cursor:pointer;} button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #9bd2d2;outline-offset:2px;} .icon {width:17px;height:17px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.topbar {height:70px;background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;} .topinner {height:100%;max-width:1880px;margin:auto;display:flex;align-items:center;gap:34px;padding:0 32px;} .brand {display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.1px;white-space:nowrap;font-size:15px;} .brandmark {width:34px;height:34px;border-radius:11px;background:#123f49;color:white;display:grid;place-items:center;} .brandmark .icon{height:21px;width:21px;} .headernav {display:flex;align-items:center;height:100%;gap:5px;overflow-x:auto;scrollbar-width:none;} .navitem {border:0;background:none;color:#66758d;border-radius:7px;font-weight:650;font-size:12px;padding:12px 13px;white-space:nowrap;transition:background .2s;} .navitem:hover{background:#f3f7fa;} .navitem.active{color:#076e70;background:#e9f7f4;} .topright{margin-left:auto;display:flex;align-items:center;gap:10px;white-space:nowrap;} .demo-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:750;color:#806829;background:#fff6df;border:1px solid #f1e1b0;padding:7px 9px;border-radius:7px;} .circlebutton{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--border);border-radius:9px;background:#fff;color:#576b85;}
+.page{max-width:1880px;margin:auto;padding:24px 32px 38px;} .pageintro{display:flex;justify-content:space-between;align-items:center;margin:0 0 20px;gap:20px;} .eyebrow{text-transform:uppercase;letter-spacing:1.9px;font-size:10px;font-weight:800;color:#15928a;margin-bottom:5px;} h1{font-size:30px;letter-spacing:-1.2px;font-weight:750;margin:0 0 3px;} .subtitle{font-size:13px;color:var(--muted);} .intro-right{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12px;} .statusdot{width:7px;height:7px;background:#1ba28a;border-radius:100%;}
+.filterbar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:13px 18px;margin-bottom:17px;box-shadow:0 8px 28px rgba(25,48,77,.05);min-height:72px;} .filterlead{display:flex;align-items:center;gap:12px;min-width:240px;} .filtericon{border-radius:10px;background:#eef7f5;width:40px;height:40px;color:#187c74;display:grid;place-items:center;} .filtericon .icon{width:20px;height:20px;} .labeltop{font-size:10px;text-transform:uppercase;letter-spacing:1.1px;font-weight:800;color:#8895a6;} .filter-title{font-size:13px;font-weight:720;margin-top:3px;} .filterright{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end;} .ctl{min-height:37px;border:1px solid #dae4ee;border-radius:9px;background:white;color:#354860;padding:0 12px;font-size:12px;font-weight:630;} select.ctl{min-width:142px;} .datectl{width:124px;text-align:center;} .date-to{color:#98a4b1;font-size:12px;} .primary{background:#126f70;color:white;border:1px solid #126f70;border-radius:9px;font-size:12px;font-weight:730;min-height:37px;padding:0 17px;display:inline-flex;align-items:center;gap:8px;justify-content:center;} .primary:hover{background:#105f60;} .ghost{border:1px solid var(--border);border-radius:9px;background:white;color:#53657f;padding:8px 11px;font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:6px;} .ghost:hover{background:#f8fafc;color:#1c7f79;} .filter-error{font-size:11px;color:var(--red);text-align:right;margin-top:-10px;height:13px;}
+.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:13px;margin:15px 0 23px;} .stat{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:131px;padding:17px 17px 14px;border-radius:15px;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;} .stat:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(32,60,85,.075);} .stat:focus-visible{outline:3px solid #9bd2d2;} .stat.s1{background:#e8f3f5;border-color:#d6ebee;} .stat.s2{background:#eef1ff;border-color:#e2e6fa;} .stat.s3{background:#edf5fb;border-color:#dcebf4;} .stat.s4{background:#f4eefb;border-color:#e8ddf3;} .stat.s5{background:#eaf6ee;border-color:#d8ebdc;} .stat.s6{background:#fff1ec;border-color:#f7e3dc;} .stat-name{font-size:11px;color:#536a7f;font-weight:760;letter-spacing:.1px;white-space:nowrap;} .stat-num{margin-top:12px;font-size:clamp(22px,1.65vw,30px);font-weight:800;letter-spacing:-.9px;line-height:1.0;color:#243550;font-variant-numeric:tabular-nums;} .stat-foot{margin-top:auto;padding-top:13px;color:#718398;font-size:10px;line-height:1.25;} .stat .staticon{position:absolute;right:15px;top:13px;opacity:.62;color:#536c83;} .stat.s5 .stat-num{color:#087d68;} .stat.s6 .stat-num{color:#c05752;}
+.sectiontop{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:13px;} .sectiontitle{font-weight:790;font-size:14px;letter-spacing:-.2px;} .sectiondesc{font-size:11px;color:var(--muted);margin-top:2px;} .layoutA{display:grid;grid-template-columns:1.47fr 1.05fr 1fr;gap:14px;} .layoutB{display:grid;grid-template-columns:1.16fr 1fr;gap:14px;margin-top:14px;} .panel{border:1px solid var(--border);border-radius:var(--radius);background:white;box-shadow:var(--shadow);min-width:0;overflow:hidden;display:flex;flex-direction:column;} .panelHead{padding:17px 19px 13px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;min-height:65px;} .panelHeading{display:flex;align-items:center;gap:10px;min-width:0;} .panelicon{width:33px;height:33px;border-radius:10px;background:#eff6f6;color:var(--teal);display:grid;place-items:center;flex-shrink:0;} .panelicon.blue{background:#eff3ff;color:#5170bc;} .panelicon.rose{background:#fff1ef;color:#c96b65;} .panelicon.violet{background:#f4effa;color:#8060ab;} .panelTitle{font-weight:800;font-size:14px;line-height:1.25;letter-spacing:-.2px;} .panelSubtitle{color:var(--muted);font-size:10px;line-height:1.5;margin-top:3px;} .explore{border:0;background:none;color:#21827b;font-size:11px;font-weight:760;display:flex;align-items:center;gap:4px;white-space:nowrap;padding:3px;} .explore .icon{width:13px;height:13px;} .panelControls{padding:0 19px 10px;display:flex;justify-content:flex-end;align-items:center;min-height:33px;} .seg{border:1px solid #e0e8ef;border-radius:9px;background:#f7f9fc;display:inline-flex;padding:3px;gap:2px;} .seg button{border:0;background:none;border-radius:6px;padding:5px 9px;color:#8190a2;font-size:10px;font-weight:760;white-space:nowrap;} .seg button.selected{background:white;box-shadow:0 1px 4px #2b476d1b;color:#16796f;} .panelContent{padding:0 19px 15px;flex:1;} .panelNote{border-top:1px solid #f0f3f6;padding:9px 19px;color:#8b99a7;font-size:10px;line-height:1.4;} .panelbody-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;} .splitcol+.splitcol{border-left:1px solid #edf0f5;padding-left:16px;} .minititle{font-size:11px;font-weight:800;color:#354861;margin-bottom:10px;display:flex;align-items:center;gap:6px;} .tinyDot{height:7px;width:7px;border-radius:50%;background:#1a9b88;} .tinyDot.amber{background:#d09b47;} .tinyDot.red{background:#d65b5e;} .ranks{display:flex;flex-direction:column;gap:10px;} .rankline{cursor:pointer;border-radius:5px;} .rankline:hover .rankname{text-decoration:underline;} .ranktop{display:flex;align-items:baseline;justify-content:space-between;gap:7px;margin-bottom:5px;} .rankname{font-size:10px;font-weight:700;color:#43566f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .rankvalue{font-size:10px;font-weight:790;color:#293d57;white-space:nowrap;font-variant-numeric:tabular-nums;} .barbg{height:6px;border-radius:9px;background:#edf2f5;overflow:hidden;} .barfill{height:100%;border-radius:9px;background:#259a90;min-width:1px;} .barfill.low{background:#daac62;} .barfill.risk{background:#e38a86;} .barfill.safe{background:#81b9af;} .barfill.cat{background:#7c86cf;} .bar-meta{font-size:9px;color:#9aa6b3;margin-top:3px;}
+.chartArea{min-height:192px;display:flex;flex-direction:column;justify-content:center;} .chartArea svg{width:100%;height:auto;display:block;overflow:visible;} .chartlegend{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;flex-wrap:wrap;} .legendleft{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:10px;font-weight:680;} .point{width:7px;height:7px;border-radius:50%;background:#3f8cb9;} .trendtot{font-weight:800;font-size:11px;color:#213852;} .readinessTop{display:flex;gap:14px;align-items:center;padding-bottom:9px;} .donut{width:114px;height:114px;flex:0 0 114px;position:relative;display:grid;place-items:center;} .donut svg{position:absolute;inset:0;transform:rotate(-90deg);} .donutcenter{position:relative;text-align:center;} .donutVal{font-size:23px;font-weight:800;letter-spacing:-1px;color:#107a70;} .donutCap{font-size:9px;color:#8a98a6;text-transform:uppercase;font-weight:750;letter-spacing:.5px;} .readinessMetrics{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;} .miniMetric{padding:10px;border:1px solid #ecf0f3;border-radius:10px;min-width:0;} .miniMetric strong{display:block;font-size:19px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;} .miniMetric small{color:var(--muted);font-size:9px;line-height:1.3;display:block;margin-top:5px;} .readinessTrend{border-top:1px solid #edf1f3;margin-top:1px;padding-top:12px;} .rmonth{display:flex;align-items:center;gap:8px;margin:7px 0;} .rmonth .mon{width:30px;flex-shrink:0;color:#7b8ba0;font-size:10px;} .rmonth .track{height:7px;flex:1;background:#edf1f5;border-radius:7px;overflow:hidden;} .rmonth .pct{width:38px;text-align:right;font-size:10px;color:#415873;font-weight:750;}
+.finesgrid{display:grid;grid-template-columns:1fr 1fr;gap:17px;} .finesgrid>.finecol+ .finecol{border-left:1px solid #edf0f5;padding-left:17px;} .smallSummary{display:flex;align-items:center;gap:18px;margin-bottom:14px;padding:8px 11px;background:#fbfcfd;border:1px solid #edf1f5;border-radius:9px;} .smStat{font-size:11px;color:#7d8a9b;} .smStat strong{font-size:14px;color:#293f59;margin-right:5px;} .workforcegrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;} .workforcegrid>div+div{border-left:1px solid #edf0f5;padding-left:20px;} .catRow{display:flex;align-items:center;gap:8px;margin:11px 0;} .catlab{width:95px;font-size:10px;font-weight:650;color:#63758b;flex-shrink:0;} .catmeter{height:9px;flex:1;border-radius:8px;background:#eff2f6;overflow:hidden;} .catmeter>div{height:100%;background:#7e81c7;border-radius:8px;} .catnum{font-size:11px;font-weight:800;color:#374b63;width:24px;text-align:right;} .wmini{border-top:1px solid #eef1f5;margin-top:13px;padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;} .wmini span{font-size:10px;color:var(--muted);} .alertnum{font-size:20px;font-weight:800;color:#bc713e;} .expbars{display:flex;height:88px;align-items:flex-end;gap:14px;border-bottom:1px solid #e9eef2;padding:0 9px 0;} .expbarItem{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;} .expcolumn{width:100%;max-width:44px;border-radius:6px 6px 0 0;background:#b4a7d7;} .expLabel{color:#75869a;font-size:9px;white-space:nowrap;} .expVal{color:#576b82;font-size:10px;font-weight:780;} .expiryline{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:4px 0;color:#778a9c;} .expiryline strong{color:#bd6f4e;}
+.focus{display:none;} .focus.show{display:block;} .overview.hide{display:none;} .focushead{background:white;border:1px solid var(--border);border-radius:16px;padding:20px 23px;display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:15px;} .backbtn{border:0;background:#f0f6f6;border-radius:8px;color:#197973;display:inline-flex;align-items:center;gap:6px;padding:9px 12px;font-weight:730;font-size:12px;} .focushead h2{margin:9px 0 5px;font-size:25px;letter-spacing:-.7px;} .focushead p{color:var(--muted);margin:0;font-size:12px;max-width:800px;line-height:1.5;} .focusbody{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(285px,.62fr);gap:15px;margin-bottom:15px;} .featureBig{background:white;border:1px solid var(--border);border-radius:15px;padding:20px 22px;} .featureBig h3{margin:0 0 15px;font-size:14px;} .featureSmall{background:white;border:1px solid var(--border);border-radius:15px;padding:20px 22px;} .featureSmall h3{font-size:14px;margin:0 0 14px;} .featureSmall p{font-size:12px;line-height:1.7;color:var(--muted);} .focus-tablepanel{background:white;border:1px solid var(--border);border-radius:15px;padding:19px 20px;overflow:hidden;} .focus-tablepanel h3{margin:0 0 6px;font-size:15px;} .tableMeta{display:flex;align-items:center;justify-content:space-between;color:#8b98a8;font-size:11px;margin-bottom:12px;gap:10px;} .searchinput{border:1px solid var(--border);border-radius:8px;padding:9px 11px;min-width:230px;color:#344962;outline:0;} .table-scroll{overflow:auto;max-height:540px;} table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap;} thead th{position:sticky;top:0;background:#f8fafc;color:#728299;text-transform:uppercase;letter-spacing:.6px;font-size:10px;padding:13px 14px;font-weight:800;} tbody td{border-bottom:1px solid #edf1f5;padding:11px 14px;font-size:12px;color:#475b75;font-variant-numeric:tabular-nums;} tbody tr{cursor:pointer;} tbody tr:hover{background:#f3f9f9;} .drivercell strong{display:block;font-size:12px;color:#243a54;} .drivercell small{display:block;font-size:10px;color:#8a99ab;margin-top:3px;} .good{color:#148773!important;font-weight:750;}.bad{color:#c85359!important;font-weight:750;}.warn{color:#c28635!important;font-weight:750;}.pill{display:inline-block;padding:5px 8px;border-radius:7px;font-size:10px;font-weight:800;} .pill.good{background:#e8f6f0;}.pill.bad{background:#fff0ed;}.pill.warn{background:#fff5e7;} .pill.neutral{background:#eef2f6;color:#738599;}
+.overlay{display:none;position:fixed;inset:0;z-index:40;background:#1b2b40a1;} .overlay.show{display:block;} .drawer{position:absolute;top:0;right:0;height:100%;width:min(690px,94vw);background:white;box-shadow:-12px 0 60px #0002;display:flex;flex-direction:column;} .drawerHeader{padding:24px 26px;background:#f9fbfc;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:15px;} .drawerTitle{font-size:24px;letter-spacing:-.6px;font-weight:800;} .drawerSub{color:var(--muted);font-size:12px;margin-top:6px;} .xbtn{width:34px;height:34px;border:1px solid var(--border);border-radius:9px;background:#fff;font-size:23px;color:#6a7e95;} .drawerBody{padding:22px 26px;overflow-y:auto;} .drawerStats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;} .drawerStat{background:#f4f8fa;border:1px solid #e8eef2;border-radius:10px;padding:12px;} .drawerStat strong{font-size:20px;font-weight:800;display:block;letter-spacing:-.5px;} .drawerStat small{color:#7b8998;font-size:10px;display:block;margin-top:4px;} .drawerTabs{display:flex;gap:5px;border-bottom:1px solid #edf1f4;margin:0 0 14px;padding-bottom:9px;} .drawerTabs button{border:0;background:none;padding:8px 13px;border-radius:7px;color:#65778f;font-size:12px;font-weight:700;} .drawerTabs button.selected{background:#e9f5f3;color:#177971;} .drawerTable{max-height:350px;overflow:auto;} .drawerTable table{min-width:600px;} .driverinfo{display:grid;grid-template-columns:1fr 1fr;gap:11px;} .infoCell{border:1px solid #e8eef3;padding:12px;border-radius:9px;} .infoCell small{display:block;color:#8594a6;font-size:10px;margin-bottom:7px;} .infoCell strong{font-size:13px;color:#30435d;} .rulesWrap{max-width:740px;margin:7vh auto;background:white;border-radius:17px;max-height:86vh;overflow:auto;box-shadow:0 18px 70px #172c462e;} .rulesHead{padding:21px 26px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;} .rulesHead strong{font-size:19px;} .rulesContent{padding:10px 27px 25px;} .rulesContent h3{font-size:13px;margin:20px 0 6px;} .rulesContent p,.rulesContent li{font-size:12px;color:#64758c;line-height:1.7;} .rulesContent ul{padding-left:18px;} .footer{color:#92a0ae;text-align:center;font-size:10px;padding:18px 0 0;} .empty{color:#91a0af;text-align:center;font-size:12px;padding:25px 0;}
+@media (min-width: 1500px) { .layoutA .panel{min-height:342px;} .layoutB .panel{min-height:340px;} }
+@media (max-width:1350px) { .topinner{gap:14px;padding:0 20px;} .page{padding:20px;} .headernav{gap:0;} .navitem{padding:10px 8px;font-size:11px;} .stats{grid-template-columns:repeat(3,1fr);} .layoutA{grid-template-columns:1.2fr 1fr;} .layoutA>.panel:last-child{grid-column:1 / -1;} .layoutB{grid-template-columns:1fr 1fr;} }
+@media (max-width:820px){ .topbar{height:auto;position:static;} .topinner{padding:13px 15px;flex-wrap:wrap;} .topright{margin-left:auto;} .headernav{order:3;width:100%;height:40px;} .page{padding:17px 13px;} .pageintro{align-items:flex-start;} h1{font-size:25px;} .intro-right{display:none;} .filterbar{flex-wrap:wrap;} .filterright{justify-content:flex-start;} .stats{grid-template-columns:repeat(2,1fr);gap:8px;} .stat{min-height:120px;padding:13px;} .stat-num{font-size:25px;} .layoutA,.layoutB{grid-template-columns:1fr;} .layoutA>.panel:last-child{grid-column:auto;} .panel{min-height:310px;} .focusbody{grid-template-columns:1fr;} .workforcegrid{gap:10px;} .finesgrid{gap:10px;} .datectl{width:108px;} }
+@media (max-width:460px){.filterright{gap:6px;} .filterlead{min-width:0;} .stats{grid-template-columns:repeat(2,minmax(0,1fr));}.stat-name{font-size:10px;} .stat-num{font-size:23px;} .seg button{padding:5px 6px;font-size:9px;} .panelHead{padding:14px 13px 10px;} .panelContent{padding:0 13px 14px;} .panelControls{padding:0 13px 9px;} .panelbody-split,.finesgrid{gap:9px;} .splitcol+.splitcol,.finesgrid>.finecol+.finecol{padding-left:9px;} .rankname{font-size:9px;} .rankvalue{font-size:9px;} .readinessTop{gap:8px;} .donut{width:90px;height:90px;flex-basis:90px;} .donut svg{width:90px;height:90px;} .donutVal{font-size:19px;} .readinessMetrics{gap:5px;} .miniMetric{padding:6px;} .miniMetric strong{font-size:16px;} .focushead{flex-direction:column;align-items:flex-start;} .driverinfo{grid-template-columns:1fr;} }
+
+/* Executive landing — compact five-panel composition, no page scrollbar at 1920x1080. */
+.page{max-width:1920px;padding:16px 28px 14px;}
+.pageintro{margin:0 0 12px;min-height:43px;align-items:center;}
+.pageintro h1{margin:0;font-size:26px;letter-spacing:-.9px;}
+.titletools{display:flex;align-items:center;gap:10px;}
+.titletools .ghost{padding:7px 12px;}
+.filterbar{padding:9px 15px;min-height:55px;margin-bottom:10px;border-radius:12px;}
+.filterlead{min-width:0;gap:9px;}.filtericon{width:32px;height:32px;border-radius:8px;}
+.labeltop{font-size:11px;letter-spacing:.4px;text-transform:none;color:#4e6078;}
+.filterright{flex-wrap:nowrap;}.datectl{width:126px;}.primary{min-height:35px;}
+.filter-error{height:12px;margin:-5px 0 5px;}
+.stats{grid-template-columns:repeat(6,minmax(0,1fr));gap:11px;margin:0;}
+.stat{min-height:0;padding:14px 16px 12px;border-radius:13px;}
+.stat-num{margin-top:10px;font-size:clamp(20px,1.5vw,29px);}
+.stat-foot{padding-top:10px;}
+.top-panels,.bottom-panels{display:grid;gap:12px;min-height:0;}
+.top-panels{grid-template-columns:1.15fr .88fr 1.13fr;}
+.bottom-panels{grid-template-columns:1.96fr 1fr;}
+.top-panels>.panel,.bottom-panels>.panel{min-height:0;height:100%;}
+.panelHead{padding:13px 15px 9px;min-height:55px;}
+.panelContent{padding:0 15px 12px;min-height:0;}
+.panelControls{padding:0 15px 9px;min-height:27px;}
+.panelNote{padding:7px 15px;font-size:10px;}
+.panelTitle{font-size:13px;}.panelSubtitle{font-size:10px;}
+.ranks{gap:8px;}.ranktop{margin-bottom:4px;}
+.readinessTop{gap:10px;}.readinessTrend{margin-top:0;}
+.finesgrid{gap:10px;}.finesgrid>.finecol+.finecol{padding-left:10px;}.smallSummary{margin-bottom:9px;padding:7px;gap:8px;flex-wrap:wrap;}
+.smStat{font-size:10px;}.smStat strong{font-size:12px;}
+.activityMega{margin-top:0;}
+.activityMega .panelContent{display:flex;min-height:0;}
+.tripleTrend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;flex:1;min-height:0;}
+.trendMetric{padding:10px 10px 6px;border-radius:12px;display:flex;flex-direction:column;justify-content:space-between;}
+.trendMetric h4{font-size:13px;}.trendMetric .sub{font-size:10px;margin-bottom:4px;}
+.trendMetric .trendMeta{margin-bottom:0;}.trendMetric .trendValue{font-size:17px;}
+.trendMetric .chartArea{min-height:0;flex:1;display:flex;justify-content:center;}
+.trendMetric .chartArea svg{max-height:162px;width:100%;height:auto;}
+.workforcegrid{gap:13px;}.expbars{margin-top:5px;}
+@media(min-width:1500px) and (min-height:850px){
+ body.landing-mode{height:100dvh;overflow:hidden;}
+ body.landing-mode .page{height:100dvh;overflow:hidden;display:flex;flex-direction:column;}
+ body.landing-mode .overview{flex:1;min-height:0;display:grid;grid-template-rows:100px minmax(0,1.09fr) minmax(0,.93fr);gap:12px;}
+}
+@media(max-width:1499px), (max-height:849px){
+ body.landing-mode{overflow:auto;}
+ .top-panels{grid-template-columns:1fr 1fr;}.top-panels>.panel:last-child{grid-column:1/-1;}
+ .bottom-panels{grid-template-columns:1fr;}.top-panels>.panel,.bottom-panels>.panel{min-height:290px;}
+ .stats{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px;}
+ .bottom-panels,.top-panels{margin-bottom:12px;}
+}
+@media(max-width:820px){
+ .page{padding:15px 12px;}.pageintro{gap:8px;}.pageintro h1{font-size:22px;}
+ .titletools .demo-label{display:none;}.filterbar{flex-wrap:wrap;}.filterright{flex-wrap:wrap;}
+ .top-panels,.bottom-panels{grid-template-columns:1fr;}
+ .top-panels>.panel:last-child{grid-column:auto;}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .tripleTrend{grid-template-columns:1fr;}
+ .top-panels>.panel,.bottom-panels>.panel{height:auto;min-height:320px;}
+}
+
+
+/* Executive refinements: preserve the monthly x-axis, prioritize workforce charts. */
+.activityMega .panelContent{padding-bottom:15px;overflow:hidden;}
+.activityMega .tripleTrend{height:100%;}
+.activityMega .trendMetric{min-height:0;overflow:hidden;}
+.activityMega .trendMetric .chartArea{flex:1;min-height:0;overflow:hidden;align-items:stretch;}
+.activityMega .trendMetric .chartArea svg{width:100%;height:100%;max-height:100%;object-fit:contain;}
+.workforcePanel .panelContent{display:flex;flex-direction:column;gap:12px;min-height:0;padding-bottom:13px;}
+.complianceSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;flex:0 0 auto;}
+.complianceMetric{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;min-height:61px;padding:9px 12px;border:1px solid #e8edf5;border-radius:11px;background:#fafbfd;}
+.complianceMetric.expired{background:#fff6f2;border-color:#f9e5dd;}
+.complianceMetric.upcoming{background:#fffaf0;border-color:#f2e9d6;}
+.complianceMetric span{color:#687b90;font-size:10.5px;line-height:1.35;font-weight:700;}
+.complianceMetric strong{font-size:25px;letter-spacing:-.6px;font-variant-numeric:tabular-nums;flex:none;}
+.complianceMetric.expired strong{color:#bc675b;}
+.complianceMetric.upcoming strong{color:#b57b36;}
+.workforcePanel .workforcegrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;min-height:0;}
+.workforcePanel .workforcegrid>div+div{border-left:1px solid #edf0f5;padding-left:16px;}
+.workforcePanel .workforceChart{display:flex;flex-direction:column;min-height:0;min-width:0;}
+.workforcePanel .workforceChart .minititle{margin-bottom:5px;font-size:11px;}
+.workforcePanel #licenseBars{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;gap:5px;}
+.workforcePanel #licenseBars .catRow{margin:0;gap:6px;min-height:24px;}
+.workforcePanel #licenseBars .catlab{width:85px;}
+.workforcePanel #licenseBars .catmeter{height:12px;}
+.workforcePanel .expbars{height:auto;flex:1;min-height:0;margin-top:0;align-items:stretch;gap:12px;}
+.workforcePanel .expbarItem{height:100%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;}
+.workforcePanel .expVal{height:14px;flex:none;}
+.workforcePanel .expBarTrack{flex:1;min-height:0;width:100%;display:flex;align-items:flex-end;justify-content:center;}
+.workforcePanel .expcolumn{max-width:52px;width:80%;max-height:100%;min-height:2px;}
+.workforcePanel .expLabel{height:14px;flex:none;}
+@media(max-width:820px){
+ .workforcePanel .complianceSummary{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .workforcePanel .workforcegrid{min-height:165px;}
+}
+
+
+/* Executive review additions — compact within a 1920 × 1080 screen. */
+.stat{min-width:0;padding-bottom:8px;}
+.stat-num{margin-top:8px;}
+.stat-foot{padding-top:5px;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.variance{display:inline-flex;align-items:center;font-size:11px;letter-spacing:-.1px;font-weight:800;border-radius:6px;padding:3px 6px;background:#eef3f8;color:#60748c;font-variant-numeric:tabular-nums;}
+.variance.up{background:#e4f5ee;color:#13816c;}.variance.down{background:#fff0e9;color:#ba674d;}.variance.flat{background:#eff2f5;color:#718398;}
+.varianceNote{font-size:10px;color:#8493a5;}
+.quickStat{border:1px solid #dfe9eb;border-radius:6px;background:#eff8f6;color:#167d71;padding:2px 6px;font-size:10px;font-weight:760;white-space:nowrap;margin-left:4px;vertical-align:middle;}
+.quickStat:hover,.repeatStat:hover{filter:brightness(.97);}
+.repeatStat{border:1px solid #f4dfd9;border-radius:7px;background:#fff3ee;color:#bc6557;padding:3px 7px;font-size:10px;font-weight:760;white-space:nowrap;}
+.repeatStat strong{font-size:12px;margin-right:4px;}
+.finesgrid .minititle{font-size:10px;margin-bottom:8px;letter-spacing:-.15px;white-space:nowrap;}
+.finesgrid .rankname{max-width:150px;}
+.noEligibility{font-size:11px;color:#8798aa;line-height:1.5;padding:10px 3px;}
+.partialIndicator{color:#ad7835;font-weight:750;font-size:10px;margin-left:6px;white-space:nowrap;}
+.focusQuickFilter{border:1px solid #b9d9d4;background:#f0f9f6;color:#187a71;border-radius:8px;padding:8px 11px;font-size:11px;font-weight:750;}
+.focusQuickFilter.enabled{background:#d8f1e9;border-color:#8dcbbf;}
+.focusQuickFilter[hidden]{display:none;}
+@media (min-width:1500px) and (min-height:850px){
+ body.landing-mode .overview{grid-template-rows:100px minmax(0,1.09fr) minmax(0,.93fr);}
+ .smallSummary{gap:4px;padding:5px 7px;}
+ .smStat{font-size:9.5px;}.smStat strong{font-size:11px;}
+ .repeatStat{padding:2px 4px;font-size:9.5px;}
+}
+
+/* Fleet-aligned executive header — compact title and all filters on one row. */
+.dashboardHeader{min-height:59px;display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:10px;}
+.headingMain{display:flex;align-items:center;gap:11px;flex:0 0 auto;min-width:0;}
+.headerEmblem{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#12375f;color:#fff;box-shadow:0 5px 12px rgba(16,50,87,.16);}
+.headerEmblem .icon{width:20px;height:20px;}
+.dashboardHeader h1{font-size:22px;font-weight:800;letter-spacing:-.7px;white-space:nowrap;margin:0;}
+.headerTools{margin-left:auto;display:flex;align-items:center;gap:12px;min-width:0;}
+.headerFilters{display:flex;align-items:flex-end;gap:9px;}
+.headerField{display:flex;flex-direction:column;gap:4px;font-size:10px;line-height:1.1;font-weight:800;color:#7185a1;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap;}
+.headerField .ctl{height:35px;min-height:35px;border-radius:8px;border:1px solid #d6dfeb;background:#fff;font-size:12px;font-weight:650;letter-spacing:normal;color:#243955;text-transform:none;}
+.headerField select.ctl{width:112px;min-width:112px;padding:0 10px;}
+.headerField input.ctl{width:153px;text-align:left;padding:0 11px;}
+.applyHeader{height:35px;min-height:35px;border-radius:8px;background:#12375f;border-color:#12375f;padding:0 17px;font-weight:750;}
+.applyHeader:hover{background:#0c2e51;}
+.headerInfo{height:32px;width:32px;flex:none;}
+.dashboardHeader .demo-label{font-size:9px;letter-spacing:.5px;padding:5px 7px;}
+body.landing-mode .page{padding-top:12px;}
+body.landing-mode .overview{margin-top:0;}
+@media(min-width:1500px) and (min-height:850px){body.landing-mode .overview{grid-template-rows:100px minmax(0,1.1fr) minmax(0,.9fr);}}
+@media(max-width:1040px){.dashboardHeader{flex-wrap:wrap;align-items:flex-start;}.headerTools{margin-left:0;flex-wrap:wrap;justify-content:flex-end;width:100%;}.headerFilters{flex-wrap:wrap;justify-content:flex-start;width:100%;}.dashboardHeader h1{font-size:21px;}}
+@media(max-width:600px){.headerFilters{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;}.headerField select.ctl,.headerField input.ctl{width:100%;min-width:0;}.applyHeader{width:100%;}.headerTools{justify-content:flex-start;}.headerInfo{order:-1;}}
+
+/* Driver Overview: same blue snapshot treatment and three-column totals as Fleet Overview. */
+@media (min-width:1500px) and (min-height:850px) {
+ body.landing-mode .stats{grid-template-columns:minmax(420px,2.22fr) repeat(6,minmax(0,1fr));gap:10px;}
+}
+.driverOverviewCard{
+ min-width:0;min-height:0;background:#eff6ff;border:1px solid #cadff8;
+ border-radius:12px;padding:10px 12px 9px;display:flex;flex-direction:column;
+ box-shadow:0 3px 14px rgba(47,100,177,.045);justify-content:space-between;
+}
+.driverOverviewHead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.driverOverviewTitle{font-size:12px;font-weight:850;color:#10294d;line-height:1.1;}
+.driverOverviewAsOf{font-size:9px;font-weight:650;color:#607c9f;margin-top:3px;}
+.driverSnapshot{font-size:8px;text-transform:uppercase;letter-spacing:.55px;font-weight:900;color:#2b609e;
+ background:#dcecff;border-radius:999px;padding:4px 7px;flex-shrink:0;}
+.driverOverviewNumbers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));min-width:0;}
+.driverOverviewMetric{padding:0 12px 0 11px;min-width:0;border-left:1px solid #cadbeb;}
+.driverOverviewMetric:first-child{padding-left:0;border-left:0;}
+.driverOverviewValue{display:block;font-size:22px;font-weight:850;color:#15365f;letter-spacing:-.5px;line-height:1.2;font-variant-numeric:tabular-nums;}
+.driverOverviewLabel{display:flex;align-items:center;gap:4px;margin-top:3px;color:#4c6383;font-weight:800;font-size:8.5px;letter-spacing:.1px;text-transform:uppercase;white-space:nowrap;}
+.driverOverviewDot{width:6px;height:6px;border-radius:50%;flex:none;background:#3779f3;}
+.driverOverviewDot.available{background:#1daa78;}
+.driverOverviewDot.mission{background:#efa930;}
+@media (max-width:1499px), (max-height:849px) {
+ .stats .driverOverviewCard{grid-column:1/-1;min-height:104px;}
+ .driverOverviewCard{min-height:104px;}
+}
+@media (max-width:820px){.driverOverviewCard{padding:12px 13px;}.driverOverviewMetric{padding:0 7px;}.driverOverviewValue{font-size:21px;}.driverOverviewLabel{font-size:8px;}}
+
+/* Calculation help and consistent executive grid alignment */
+.infoTrigger{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;padding:2px;border-radius:50%;border:1px solid #c9d7e6;background:#fff;color:#647f9f;cursor:pointer;flex:0 0 auto;vertical-align:middle;transition:background .12s,border-color .12s;}
+.infoTrigger:hover{color:#12375f;background:#e8f2ff;border-color:#6c96c8;}
+.infoTrigger .icon{height:13px;width:13px;stroke-width:2;}
+.infoTrigger:focus-visible{outline:2px solid #3483dd;outline-offset:2px;}
+.headerFilters .headerInfo{align-self:flex-end;width:34px;height:35px;border-radius:8px;border-color:#d5e1ee;margin-left:0;background:white;}
+.headerFilters .headerInfo .icon{height:18px;width:18px;}
+.driverOverviewTitleRow,.panelTitleRow,.statNameRow{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;}
+.panelTitleRow .panelTitle{white-space:nowrap;}
+.panelInfo{width:17px;height:17px;}
+.panelInfo .icon{width:12px;height:12px;}
+.overviewInfo{width:16px;height:16px;}
+.overviewInfo .icon{width:11px;height:11px;}
+.statNameRow{padding-right:0;}
+.statNameRow .stat-name{font-size:10.5px;white-space:normal;line-height:1.15;}
+.statInfo{width:16px;height:16px;background:rgba(255,255,255,.85);margin-left:auto;}
+.statInfo .icon{height:11px;width:11px;}
+.stat .staticon{display:none;}
+.top-panels{grid-template-columns:repeat(3,minmax(0,1fr));}
+.bottom-panels{grid-template-columns:repeat(2,minmax(0,1fr));}
+/* Three readable charts stacked within the same-width activity card. */
+.activityMega .panelContent{display:flex;flex:1;min-height:0;padding-bottom:10px;}
+.activityMega .tripleTrend{display:grid;grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(0,1fr));gap:6px;width:100%;height:100%;min-height:0;}
+.activityMega .trendMetric{min-width:0;min-height:0;padding:5px 9px;display:grid;grid-template-columns:122px minmax(0,1fr);grid-template-rows:1fr 1fr;gap:0 6px;align-items:center;}
+.activityMega .trendMetric h4{grid-column:1;grid-row:1;margin:0;font-size:11px;line-height:1.25;}
+.activityMega .trendMetric .sub{display:none;}
+.activityMega .trendMetric .trendMeta{grid-column:1;grid-row:2;min-width:0;margin:0;}
+.activityMega .trendMetric .trendValue{font-size:14px;white-space:nowrap;}
+.activityMega .trendMetric .chartArea{grid-column:2;grid-row:1 / span 2;display:flex;min-height:0;width:100%;overflow:hidden;}
+.activityMega .trendMetric .chartArea svg{max-height:91px;width:100%;height:100%;object-fit:contain;}
+.infoWrap{max-width:750px;margin:5vh auto;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.infoWrap .rulesHead{flex:0 0 auto;padding:18px 26px;}
+.infoWrap .rulesContent{overflow-y:auto;padding:2px 28px 24px;}
+.infoKicker{font-size:10px;font-weight:800;letter-spacing:1.2px;color:#5479a2;margin-bottom:5px;}
+.calcRule{padding:15px 0 18px;border-bottom:1px solid #e9edf3;}
+.calcRule h3{margin:0 0 8px;font-size:14px;color:#1b3552;}
+.calcFormula{border-radius:8px;background:#eff5fc;color:#1f527e;font-size:12px;line-height:1.65;font-weight:720;padding:9px 12px;overflow-wrap:anywhere;}
+.calcExample{margin-top:10px;background:#f7fafc;border-left:3px solid #29948c;padding:10px 12px;border-radius:0 8px 8px 0;color:#445a72;font-size:12px;line-height:1.7;}
+.calcExample strong{display:block;color:#166e68;font-size:11px;margin-bottom:3px;}
+.calcRule p{font-size:12px;color:#61728a;line-height:1.7;margin:10px 0 0;}
+.infoFootnote{font-size:11px;color:#8292a4;line-height:1.6;margin:16px 0 0;}
+@media(min-width:1500px) and (min-height:850px){
+ body.landing-mode .overview{grid-template-rows:100px minmax(0,1.12fr) minmax(0,.88fr);}
+}
+@media(max-width:1499px), (max-height:849px){
+ .top-panels{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .top-panels>.panel:last-child{grid-column:1/-1;}
+ .bottom-panels{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .activityMega .trendMetric{min-height:96px;}
+ .activityMega .tripleTrend{min-height:305px;}
+}
+@media(max-width:820px){
+ .top-panels,.bottom-panels{grid-template-columns:1fr;}
+ .top-panels>.panel:last-child{grid-column:auto;}
+ .headerTools{gap:5px;}
+ .headerFilters .headerInfo{order:0;}
+ .panelTitleRow .panelTitle{white-space:normal;}
+}
+
+
+/* Executive layout refinement — elevate fine controls, keep threshold readable, expand rankings. */
+.trafficFinesPanel .panelHead{align-items:center;padding-bottom:7px;min-height:52px;}
+.fineHeadActions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex:0 0 auto;}
+.fineHeadActions .seg button{font-size:10px;padding:6px 10px;}
+.trafficFinesPanel .panelContent{display:flex;flex:1;flex-direction:column;gap:5px;min-height:0;padding-bottom:10px;}
+.trafficFinesPanel .smallSummary{flex:none;min-height:27px;gap:8px;margin:0;padding:5px 9px;}
+.trafficFinesPanel .fineEligibility{flex:none;display:flex;align-items:center;gap:3px;min-height:18px;font-size:10px;color:#627992;font-weight:650;line-height:1.25;white-space:normal;}
+.trafficFinesPanel .fineEligibility strong{color:#284c74;font-weight:800;}
+.trafficFinesPanel .finesgrid{flex:1;min-height:0;padding:3px 0 0;gap:15px;}
+.trafficFinesPanel .finecol{min-width:0;min-height:0;display:flex;flex-direction:column;}
+.trafficFinesPanel .finesgrid>.finecol+.finecol{padding-left:15px;}
+.trafficFinesPanel .finesgrid .minititle{flex:none;margin-bottom:4px;font-size:11px;}
+.trafficFinesPanel .ranks{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;gap:6px;}
+.trafficFinesPanel .rankline{flex:0 0 auto;}
+.trafficFinesPanel .ranktop{margin-bottom:5px;}
+.trafficFinesPanel .barbg{height:7px;}
+/* Put each license status in its matching column above its chart. */
+.workforcePanel .panelContent{display:flex;flex:1;min-height:0;padding-bottom:10px;gap:0;}
+.workforcePanel .workforcegrid{flex:1;min-height:0;gap:16px;}
+.workforcePanel .workforceChart{display:flex;flex-direction:column;min-height:0;min-width:0;}
+.workforcePanel .workforceChart .minititle{flex:none;font-size:11px;margin:0 0 7px;line-height:1.35;}
+.workforcePanel .workforceChart .complianceMetric{flex:none;align-self:stretch;min-width:0;min-height:48px;padding:8px 11px;margin:0 0 6px;gap:9px;}
+.workforcePanel .workforceChart .complianceMetric span{flex:1;min-width:0;font-size:10.5px;line-height:1.25;overflow-wrap:break-word;}
+.workforcePanel .workforceChart .complianceMetric strong{font-size:22px;}
+.workforcePanel #licenseBars{flex:1;min-height:0;justify-content:space-evenly;}
+.workforcePanel .expbars{flex:1;min-height:0;}
+@media(max-width:820px){
+ .fineHeadActions{gap:5px;flex-wrap:wrap;}
+ .fineHeadActions .seg button{padding:5px 6px;font-size:9px;}
+ .trafficFinesPanel .finesgrid{gap:8px;}
+ .trafficFinesPanel .finesgrid>.finecol+.finecol{padding-left:8px;}
+ .workforcePanel .workforceChart .complianceMetric{padding:6px;gap:4px;min-height:54px;}
+ .workforcePanel .workforceChart .complianceMetric strong{font-size:18px;}
+}
+
+/* Actionable repeated delays tile in the existing compact readiness layout. */
+.repeatDelayMetric{font-family:inherit;background:#fffbf1;text-align:left;color:inherit;cursor:pointer;width:100%;border-color:#f4e7ca;}
+.repeatDelayMetric:hover{background:#fff5df;border-color:#e8c58e;}
+.repeatDelayMetric:focus-visible{outline:2px solid #168b7b;outline-offset:2px;}
+.trafficFinesPanel .fineEligibility strong{font-weight:800;color:#284c74;}
+
+/* Schedule Compliance: make the full card informative and fill usable area without page scroll. */
+.top-panels>.panel:first-child .panelContent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-height:0;flex:1;padding-bottom:8px;}
+.top-panels>.panel:first-child .splitcol{min-width:0;display:flex;flex-direction:column;min-height:0;}
+.top-panels>.panel:first-child .splitcol+.splitcol{padding-left:12px;}
+.top-panels>.panel:first-child .ranks{flex:1;min-height:0;justify-content:space-evenly;gap:5px;}
+.top-panels>.panel:first-child .ranktop{margin-bottom:4px;}
+.top-panels>.panel:first-child .rankname,.top-panels>.panel:first-child .rankvalue{font-size:11px;}
+.top-panels>.panel:first-child .barbg{height:8px;}
+.top-panels>.panel:first-child .panelNote{padding:6px 15px;}
+.top-panels>.panel:nth-child(2) .panelContent{display:flex;flex-direction:column;justify-content:space-between;min-height:0;padding-bottom:9px;gap:5px;}
+.top-panels>.panel:nth-child(2) .readinessTop{flex:0 0 auto;padding-bottom:0;gap:10px;}
+.top-panels>.panel:nth-child(2) .donut{width:98px;height:98px;flex-basis:98px;}
+.top-panels>.panel:nth-child(2) .donut svg{width:98px;height:98px;}
+.top-panels>.panel:nth-child(2) .donutVal{font-size:21px;}
+.top-panels>.panel:nth-child(2) .donutCap{font-size:8px;letter-spacing:0;}
+.top-panels>.panel:nth-child(2) .miniMetric{padding:8px;min-height:0;}
+.top-panels>.panel:nth-child(2) .miniMetric strong{font-size:20px;}
+.top-panels>.panel:nth-child(2) .miniMetric small{font-size:9px;line-height:1.3;}
+.scheduleBreakdown{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:0 0 auto;}
+.complianceMini{display:flex;align-items:center;justify-content:space-between;gap:6px;border:1px solid #e2edf6;border-radius:8px;background:#f6fafc;padding:7px 8px;min-width:0;}
+.complianceMini span{font-size:9.5px;font-weight:750;color:#607891;}
+.complianceMini strong{font-size:14px;color:#195d82;font-weight:850;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.top-panels>.panel:nth-child(2) .readinessTrend{min-height:0;flex:1;display:flex;flex-direction:column;gap:4px;}
+.top-panels>.panel:nth-child(2) #readyMonths{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;}
+/* Vertical divider begins after the Driver Experience heading, not through it. */
+.workforcePanel .workforcegrid>.workforceChart+div,.workforcePanel .workforcegrid>div+div{border-left:0;padding-left:16px;position:relative;}
+.workforcePanel .workforcegrid>.workforceChart+div::before,.workforcePanel .workforcegrid>div+div::before{content:"";position:absolute;left:0;top:24px;bottom:0;width:1px;background:#dce6f0;pointer-events:none;}
+@media(max-width:820px){.top-panels>.panel:first-child .rankname,.top-panels>.panel:first-child .rankvalue{font-size:10px;} .scheduleBreakdown{gap:5px;} .complianceMini{padding:6px;} .complianceMini span{font-size:9px;}}
+
+/* Approved Option 1: three equal-width mini charts with clear markers and discrete scales. */
+.activityMega .panelContent{padding:0 12px 12px;display:flex;flex:1;min-height:0;}
+.activityMega .tripleTrend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:9px;width:100%;height:100%;min-height:0;}
+.activityMega .trendMetric{display:flex;flex-direction:column;align-items:stretch;justify-content:stretch;gap:8px;min-width:0;min-height:0;padding:14px 10px 9px;border-radius:12px;border:1px solid #e5ecf3;background:#fbfdff;overflow:hidden;}
+.activityMega .activityMetricHead{display:flex;justify-content:space-between;align-items:center;gap:3px;flex:0 0 auto;min-width:0;}
+.activityMega .trendMetric h4{font-size:11px;line-height:1.25;margin:0;min-width:0;font-weight:800;color:#304863;}
+.activityMega .activityColorDot{height:8px;width:8px;border-radius:50%;flex:0 0 8px;}
+.activityMega .trendMetric .trendMeta{display:flex;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px;margin:0;flex:0 0 auto;min-width:0;}
+.activityMega .trendMetric .trendValue{font-size:19px;line-height:1.1;font-weight:850;white-space:normal;overflow-wrap:anywhere;}
+.activityMega .activityUnit{font-size:9px;color:#8b9aab;white-space:normal;}
+.activityMega .trendMetric .chartArea{display:flex;align-items:stretch;justify-content:center;flex:1;min-height:0;width:100%;height:auto;overflow:hidden;}
+.activityMega .trendMetric .chartArea svg{display:block;width:100%;height:100%;max-height:100%;object-fit:fill;overflow:visible;}
+/* Put both license expiry figures together, under License Categories, with one divider. */
+.workforcePanel .licenseStatusGroup{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;flex:none;min-width:0;margin:0 0 8px;border:1px solid #e7edf4;background:#f8fafc;border-radius:9px;overflow:hidden;}
+.workforcePanel .licenseStatusItem{display:flex;align-items:center;justify-content:space-between;gap:5px;min-width:0;min-height:53px;padding:7px 9px;}
+.workforcePanel .licenseStatusItem+.licenseStatusItem{border-left:1px solid #dce5ef;}
+.workforcePanel .licenseStatusItem span{color:#70829a;font-size:10px;font-weight:700;line-height:1.25;min-width:0;overflow-wrap:break-word;}
+.workforcePanel .licenseStatusItem strong{font-size:19px;line-height:1;color:#b46b47;white-space:nowrap;flex:0 0 auto;}
+.workforcePanel #experienceBars{flex:1;min-height:0;}
+@media(max-width:1499px), (max-height:849px){
+ .activityMega .tripleTrend{min-height:290px;}
+ .activityMega .trendMetric{min-height:290px;}
+}
+@media(max-width:820px){
+ .activityMega .tripleTrend{grid-template-columns:1fr;grid-template-rows:repeat(3,240px);}
+ .activityMega .trendMetric{min-height:235px;}
+}
+
+/* Review mockup: three equal-width panels in the second row. */
+@media(min-width:1351px){.bottom-panels{grid-template-columns:repeat(3,minmax(0,1fr));}}
+.availabilityPanel .panelContent{display:flex;flex-direction:column;gap:8px;padding-bottom:12px;min-height:0;}
+.availabilityStamp{font-size:10px;color:#71849b;font-weight:650;}
+.availabilityTotal{font-size:13px;font-weight:800;color:#176f6d;}
+.availabilityRows{display:flex;flex-direction:column;gap:9px;min-height:0;flex:1;justify-content:center;}
+.availItem{display:flex;flex-direction:column;gap:5px;}.availHeader{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#354962;font-weight:700;}.availHeader span:last-child{font-size:10px;color:#738498;font-weight:650;}
+.availBar{height:13px;border-radius:6px;background:#e8eff2;display:flex;overflow:hidden;gap:2px;}.availBar .good{background:#1fa484;}.availBar .busy{background:#e7a445;flex:1;}
+.availabilityLegend{display:flex;gap:15px;font-size:10px;color:#71849b;align-items:center;margin-top:auto;}.availabilityLegend span{display:inline-flex;align-items:center;gap:5px;}.availabilityLegend i{display:inline-block;width:9px;height:9px;border-radius:3px;}.availableDot{background:#1fa484;}.missionDot{background:#e7a445;}
+@media(min-width:1351px){.trafficFinesPanel .panelHead,.workforcePanel .panelHead,.availabilityPanel .panelHead{padding-left:12px;padding-right:12px;}.trafficFinesPanel .panelContent,.workforcePanel .panelContent{padding-left:12px;padding-right:12px;}.bottom-panels .panelTitle{font-size:12px;}.bottom-panels .panelSubtitle{font-size:9px;}.bottom-panels .fineHeadActions .seg button{padding:4px 5px;font-size:9px;}.bottom-panels .panelHeading{gap:5px;}.bottom-panels .panelicon{width:27px;height:27px;}.workforcePanel .workforcegrid{gap:7px;}.workforcePanel .minititle{font-size:10px;}.trafficFinesPanel .ranks{gap:5px;}}
+</style>
+</head>
+<body class="landing-mode">
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs>
+<symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 20V13M10 20V7M16 20V4M22 20v-9"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M15 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8M21 20v-2a4 4 0 0 0-3-3.87M16 2.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 16V7c0-3 5-4 7-1M18 7v9c0 4-4 4-7 4"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/><circle cx="12" cy="12" r="10"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 21h20L12 3Z"/><path d="M12 9v5M12 18v.1"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="white"/><circle cx="15" cy="17" r="2" fill="white"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v.1"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3 8 8 11 5-3 8-6 8-11V5l-8-3Z"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-3 6-3 6 0m3-7h3m-3 4h3"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+</defs></svg>
+<main class="page">
+ <header class="dashboardHeader"><div class="headingMain"><span class="headerEmblem"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg></span><h1 id="pageTitle">Driver Performance</h1></div>
+  <div class="headerTools">
+   <div class="headerFilters" aria-label="Dashboard filters">
+    <label class="headerField unitField" for="unitFilter"><span>Unit</span><select id="unitFilter" class="ctl"><option value="All Units">All Units</option><option value="Unit A">Unit A</option><option value="Unit B">Unit B</option><option value="Unit C">Unit C</option><option value="Unit D">Unit D</option></select></label>
+    <button class="infoTrigger headerInfo" type="button" id="explainBtn" data-info="all" aria-label="First-row KPI calculation guide" title="First-row KPI calculation guide"><svg class="icon"><use href="#i-info"/></svg></button>
+    <label class="headerField" for="fromDate"><span>From</span><input id="fromDate" aria-label="From date" class="ctl datectl" placeholder="dd-MMM-yyyy"/></label>
+    <label class="headerField" for="toDate"><span>To</span><input id="toDate" aria-label="To date" class="ctl datectl" placeholder="dd-MMM-yyyy"/></label>
+    <button class="primary applyHeader" id="applyBtn" type="button">Apply</button>
+   </div>
+  </div></header>
+ <div class="filter-error" id="filterError"></div>
+ <section class="overview" id="overview">
+  <div class="stats" id="statCards"></div>
+  <div class="top-panels">
+<section class="panel"><div class="panelHead"><div class="panelHeading"><span class="panelicon"><svg class="icon"><use href="#i-users"/></svg></span><div><div class="panelTitleRow"><div class="panelTitle">Driver Utilization</div><button class="infoTrigger panelInfo" type="button" data-info="utilization" title="How Driver Utilization is calculated" aria-label="How Driver Utilization is calculated"><svg class="icon"><use href="#i-info"/></svg></button></div><div class="panelSubtitle">Most & least utilized drivers <button class="quickStat" id="zeroDriverBtn" type="button" title="View drivers with no closed missions"><strong id="zeroDriverCount">0</strong> no missions</button></div></div></div><button class="explore" data-view="utilization">Explore <svg class="icon"><use href="#i-arrow"/></svg></button></div><div class="panelControls"><div class="seg" data-seg="util"></div></div><div class="panelContent panelbody-split"><div class="splitcol"><div class="minititle"><span class="tinyDot"></span>Most utilized</div><div class="ranks" id="highUtil"></div></div><div class="splitcol"><div class="minititle"><span class="tinyDot amber"></span>Least utilized</div><div class="ranks" id="lowUtil"></div></div></div><div class="panelNote">Closed missions only · ranking includes zero activity</div></section>
+<section class="panel"><div class="panelHead"><div class="panelHeading"><span class="panelicon"><svg class="icon"><use href="#i-shield"/></svg></span><div><div class="panelTitleRow"><div class="panelTitle">Mission Schedule Compliance</div><button class="infoTrigger panelInfo" type="button" data-info="readiness" title="How Mission Schedule Compliance is calculated" aria-label="How Mission Schedule Compliance is calculated"><svg class="icon"><use href="#i-info"/></svg></button></div><div class="panelSubtitle">Start-time and end-date compliance · Zero tolerance</div></div></div><button class="explore" data-view="readiness">Explore <svg class="icon"><use href="#i-arrow"/></svg></button></div><div class="panelContent"><div class="readinessTop"><div class="donut" id="readyDonut"></div><div class="readinessMetrics"><div class="miniMetric"><strong class="bad" id="lateNum">0</strong><small>Delayed missions</small></div><button class="miniMetric repeatDelayMetric" id="repeatDelayBtn" type="button" title="View drivers with at least one delayed Closed mission" aria-label="View drivers with delays"><strong class="warn" id="repeatDelayCount">0</strong><small>Drivers with delays (1+)</small></button></div></div><div class="scheduleBreakdown" id="scheduleBreakdown" aria-label="Start and end punctuality"></div><div class="readinessTrend"><div class="minititle" style="margin:1px 0 3px">Monthly schedule compliance</div><div id="readyMonths"></div></div></div></section>
+<section class="panel activityMega"><div class="panelHead"><div class="panelHeading"><span class="panelicon blue"><svg class="icon"><use href="#i-bars"/></svg></span><div><div class="panelTitleRow"><div class="panelTitle">Monthly Driver Activity Trend</div><button class="infoTrigger panelInfo" type="button" data-info="activity" title="How Monthly Driver Activity Trend is calculated" aria-label="How Monthly Driver Activity Trend is calculated"><svg class="icon"><use href="#i-info"/></svg></button></div><div class="panelSubtitle">Kilometres · Missions · Mission Hours</div></div></div><button class="explore" data-view="activity">Explore <svg class="icon"><use href="#i-arrow"/></svg></button></div><div class="panelContent"><div class="tripleTrend" id="activityMulti"></div></div></section>
+  </div>
+  <div class="bottom-panels">
+<section class="panel trafficFinesPanel"><div class="panelHead"><div class="panelHeading"><span class="panelicon rose"><svg class="icon"><use href="#i-alert"/></svg></span><div><div class="panelTitleRow"><div class="panelTitle">Traffic Fines</div><button class="infoTrigger panelInfo" type="button" data-info="fines" title="How Traffic Fines is calculated" aria-label="How Traffic Fines is calculated"><svg class="icon"><use href="#i-info"/></svg></button></div><div class="panelSubtitle">Fine exposure and repeat violations</div></div></div><div class="fineHeadActions"><div class="seg" data-seg="fine" aria-label="Traffic fine ranking metric"></div><button class="explore" data-view="fines">Explore <svg class="icon"><use href="#i-arrow"/></svg></button></div></div><div class="panelContent"><div class="smallSummary" id="finesSummary"></div><div class="fineEligibility" id="fineEligibility">Fine rate rankings require at least <strong>2,500 km</strong> · Closed missions only</div><div class="finesgrid"><div class="finecol"><div class="minititle"><span class="tinyDot red"></span>Highest traffic fines</div><div class="ranks" id="highFine"></div></div><div class="finecol"><div class="minititle"><span class="tinyDot red"></span>Highest fines / 1,000 KM</div><div class="ranks" id="lowFine"></div></div></div></div></section>
+<section class="panel availabilityPanel"><div class="panelHead"><div class="panelHeading"><span class="panelicon"><svg class="icon"><use href="#i-users"/></svg></span><div><div class="panelTitleRow"><div class="panelTitle">Driver Availability by Location</div><button class="infoTrigger panelInfo" type="button" data-info="availability" title="Availability calculation" aria-label="Availability calculation"><svg class="icon"><use href="#i-info"/></svg></button></div><div class="panelSubtitle">Current operational status by Unit</div></div></div></div><div class="panelContent"><div class="availabilityStamp" id="availabilityStamp"></div><div class="availabilityRows" id="availabilityRows"></div><div class="availabilityLegend"><span><i class="availableDot"></i>Available</span><span><i class="missionDot"></i>On Mission</span></div></div></section>
+<section class="panel workforcePanel"><div class="panelHead"><div class="panelHeading"><span class="panelicon violet"><svg class="icon"><use href="#i-id"/></svg></span><div><div class="panelTitleRow"><div class="panelTitle">Workforce & License Compliance</div><button class="infoTrigger panelInfo" type="button" data-info="workforce" title="How Workforce & License Compliance is calculated" aria-label="How Workforce & License Compliance is calculated"><svg class="icon"><use href="#i-info"/></svg></button></div><div class="panelSubtitle">Experience, qualifications and expiring licenses</div></div></div><button class="explore" data-view="workforce">Explore <svg class="icon"><use href="#i-arrow"/></svg></button></div><div class="panelContent"><div class="workforcegrid">
+ <div class="workforceChart"><div class="minititle">License categories</div><div class="licenseStatusGroup" aria-label="License expiry summary"><div class="licenseStatusItem" aria-label="Licenses expired by report end"><span>Expired by report end</span><strong id="expiredCount" class="alertnum">0</strong></div><div class="licenseStatusItem" aria-label="Licenses expiring within 90 days"><span>Within 90 days</span><strong id="expiringCount" class="alertnum">0</strong></div></div><div id="licenseBars"></div></div>
+ <div class="workforceChart"><div class="minititle">Driver experience</div><div id="experienceBars" class="expbars"></div></div>
+</div></div><div class="panelNote">License status evaluated as of the reporting end date</div></section>
+  </div>
+ </section>
+ <section id="focus" class="focus" aria-live="polite"><div class="focushead"><div><button class="backbtn" id="backBtn"><svg class="icon"><use href="#i-back"/></svg> All insights</button><h2 id="focusTitle">Detail</h2><p id="focusDescription"></p></div><span class="demo-label">Illustrative records</span></div><div class="focusbody"><section class="featureBig" id="focusViz"></section><section class="featureSmall" id="focusInsight"></section></div><div class="focus-tablepanel"><h3 id="focusTableTitle">Driver ranking</h3><div class="tableMeta"><span id="focusCount"></span><button id="focusQuickFilter" class="focusQuickFilter" type="button" hidden></button><input id="driverSearch" class="searchinput" placeholder="Search driver name / ID" aria-label="Search drivers"></div><div class="table-scroll"><table><thead id="focusThead"></thead><tbody id="focusTbody"></tbody></table></div></div></section>
+</main>
+<div class="overlay" id="driverOverlay" role="dialog" aria-modal="true" aria-label="Driver details"><div class="drawer"><div class="drawerHeader"><div><div class="eyebrow" style="margin-bottom:9px">Driver performance profile</div><div class="drawerTitle" id="driverTitle"></div><div class="drawerSub" id="driverSubtitle"></div></div><button class="xbtn" data-close="driverOverlay" aria-label="Close">×</button></div><div class="drawerBody"><div class="drawerStats" id="drawerStats"></div><div class="drawerTabs" id="drawerTabs"></div><div id="drawerTabContent"></div></div></div></div>
+<div class="overlay infoOverlay" id="rulesOverlay" role="dialog" aria-modal="true" aria-labelledby="infoTitle" aria-hidden="true"><div class="rulesWrap infoWrap"><div class="rulesHead"><div><div class="infoKicker">KPI CALCULATION GUIDE</div><strong id="infoTitle">Dashboard calculations</strong></div><button class="xbtn" type="button" data-close="rulesOverlay" aria-label="Close calculation guide">×</button></div><div class="rulesContent" id="infoBody"></div></div></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), fmt=new Intl.NumberFormat('en-US'), fmt1=new Intl.NumberFormat('en-US',{maximumFractionDigits:1});
+const useIcon=(name)=>`<svg class="icon"><use href="#i-${name}"/></svg>`;
+const safe=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAYS=86400000, HOUR=3600000;
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const dateLabel=d=>`${String(d.getDate()).padStart(2,'0')}-${months[d.getMonth()]}-${d.getFullYear()}`;
+const dateTimeLabel=d=>d?`${dateLabel(d)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`:'—';
+const toDateOnly=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const parseDisplayDate=s=>{const m=/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec(s.trim());if(!m)return null;const mo=months.findIndex(x=>x.toLowerCase()===m[2].toLowerCase());if(mo<0)return null;let d=new Date(+m[3],mo,+m[1]);return d.getMonth()===mo&&d.getDate()===+m[1]&&d.getFullYear()===+m[3]?d:null;};
+const daysBetween=(a,b)=>Math.round((toDateOnly(b)-toDateOnly(a))/DAYS);
+let seed=912304;const rnd=()=>((seed=(1664525*seed+1013904223)>>>0)/4294967296);
+const choose=a=>a[Math.floor(rnd()*a.length)], randint=(a,b)=>Math.floor(rnd()*(b-a+1))+a;
+const realNow=new Date(),today=toDateOnly(realNow);
+let availabilityAsOf=new Date();
+const first=['Ahmed','Mohammed','Ravi','Arun','Salim','Faisal','Kumar','David','John','Ibrahim','Rahul','Naveen','Sanjay','Joseph','Hassan','Farhan','Omar','Bilal','Pradeep','Khalid','Harish','Basil','Sameer','Vivek','Daniel','Asif','Nikhil','Ramesh','Yusuf','Ajith'];
+const last=['Khan','Ali','Nair','Raj','Patel','Hassan','Thomas','Kumar','Ahmed','Sharma','Das','Menon','Ismail','Fernandes','Singh','Joseph','Rahman','Varghese','Rao','Mathew','Farooq','Yadav','Saeed','Krishnan','George'];
+const categories=['Sedan','SUV','People Movers'];
+const units=['Unit A','Unit B','Unit C','Unit D'];
+const drivers=Array.from({length:120},(_,i)=>{
+ const exp=+(rnd()*19+.5).toFixed(1), lic=choose(categories),expiry=new Date(today);
+ expiry.setDate(expiry.getDate()+randint(-75,650));
+ // A handful of drivers have no missions to ensure zero-activity rankings stay visible.
+ return{id:`DRV-${String(i+1).padStart(4,'0')}`,name:`${first[i%first.length]} ${last[(i*7+Math.floor(i/17))%last.length]}`,unit:units[i%units.length],experience:exp,category:lic,expiry,weight:i<10?1.75:i<22?.22:i>=115?0: .8+rnd()*.65};
+});
+const driverMap=new Map(drivers.map(d=>[d.id,d]));
+const missions=[],fines=[];
+const startWindow=new Date(today);startWindow.setMonth(startWindow.getMonth()-14);
+const rangeLength=daysBetween(startWindow,today);
+const weighted=drivers.flatMap(d=>Array.from({length:Math.round(d.weight*10)},()=>d.id));
+for(let i=0;i<2950;i++){
+ const driverId=choose(weighted), d=driverMap.get(driverId);
+ const planned=new Date(startWindow.getFullYear(),startWindow.getMonth(),startWindow.getDate()+randint(0,rangeLength),randint(5,20),randint(0,3)*15,0);
+ const plannedH=randint(2,13),plannedEnd=new Date(+planned+plannedH*HOUR);
+ const cancelled=rnd()<.027, missing=!cancelled&&rnd()<.022;
+ let rfid=null,completed=false,actualEnd=null,odoStart=null,odoEnd=null;
+ if(!cancelled&&!missing){
+  // RFID activation represents actual mission start, including early starts.
+  let offset=rnd()<.84?-randint(1,35):randint(0,38);
+  rfid=new Date(+planned+offset*60000);
+  let actualH=plannedH+(rnd()-.5)*2.4;
+  actualEnd=new Date(+rfid+Math.max(.5,actualH)*HOUR);
+  completed=actualEnd<=realNow;
+  if(!completed)actualEnd=null;
+  odoStart=randint(22000,175000);
+  const km=Math.round((plannedH*randint(21,59))*(.5+rnd()*.52));
+  odoEnd=odoStart+Math.max(5,km);
+ }
+ const mission={id:`MS-${String(i+1).padStart(5,'0')}`,request:`REQ-${String(41000+Math.floor(i/1.6))}`,driverId,planned,plannedEnd,rfid,actualStart:rfid,actualEnd,odoStart,odoEnd,status:cancelled?'Cancelled':missing?'Unactivated':completed?'Closed':'In Progress'};
+ missions.push(mission);
+ if(completed&&rnd()<.165){
+  const count=rnd()<.22?2:1;
+  for(let j=0;j<count;j++){
+   const at=new Date(+rfid+Math.round((+actualEnd- +rfid)*rnd()));
+   fines.push({id:`TF-${String(fines.length+1).padStart(5,'0')}`,driverId,missionId:mission.id,offense:at,amount:choose([150,200,300,400,500,600,800,1000,1500,2000])});
+  }
+ }
+}
+const state={unit:'All Units',from:new Date(today.getFullYear(),today.getMonth()-4,today.getDate()),to:today,view:'overview',util:'hours',trend:'missions',fine:'count',driver:null,drawerTab:'missions',search:'',zeroOnly:false,repeatOnly:false,repeatDelayOnly:false};
+const inRange=d=>d&&toDateOnly(d)>=state.from&&toDateOnly(d)<=state.to;
+const trunc=(v,n=0)=>n?fmt1.format(v):fmt.format(Math.round(v));
+const shortMonth=d=>`${months[d.getMonth()]} '${String(d.getFullYear()).slice(-2)}`;
+function selectedDrivers(){return state.unit==='All Units'?drivers:drivers.filter(d=>d.unit===state.unit);}
+function currentDriverOverview(unit=state.unit){
+ const roster=unit==='All Units'?drivers:drivers.filter(d=>d.unit===unit);
+ const ids=new Set(roster.map(d=>d.id));
+ // Use the live mission state, not the reporting-period filter. Count drivers, not missions.
+ const onMissionIds=new Set(missions.filter(m=>m.status==='In Progress'&&m.rfid&&m.rfid<=realNow&&!m.actualEnd&&ids.has(m.driverId)).map(m=>m.driverId));
+ return {total:roster.length,onMission:onMissionIds.size,available:roster.length-onMissionIds.size};
+}
+function driverOverviewCard(){
+ const v=currentDriverOverview();
+ const cells=[
+  {value:v.total,label:'Total Drivers',dot:''},
+  {value:v.available,label:'Available',dot:'available'},
+  {value:v.onMission,label:'On Mission',dot:'mission'}
+ ];
+ return `<section class="driverOverviewCard" aria-label="Driver Overview as of ${dateTimeLabel(availabilityAsOf)}">
+   <div class="driverOverviewHead"><div><div class="driverOverviewTitleRow"><div class="driverOverviewTitle">Driver Overview</div><button class="infoTrigger overviewInfo" type="button" data-info="overview" title="Driver Overview calculation" aria-label="Driver Overview calculation"><svg class="icon"><use href="#i-info"/></svg></button></div><div class="driverOverviewAsOf">As of ${dateTimeLabel(availabilityAsOf)}</div></div><span class="driverSnapshot">Snapshot</span></div>
+   <div class="driverOverviewNumbers">${cells.map(c=>`<div class="driverOverviewMetric"><strong class="driverOverviewValue">${trunc(c.value)}</strong><div class="driverOverviewLabel"><span class="driverOverviewDot ${c.dot}"></span>${c.label}</div></div>`).join('')}</div>
+  </section>`;
+}
+function aggregate(from=state.from,to=state.to){
+ const periodMatch=d=>d&&toDateOnly(d)>=from&&toDateOnly(d)<=to;
+ const roster=selectedDrivers();
+ const per=new Map(roster.map(d=>[d.id,{...d,missionCount:0,hours:0,km:0,late:0,ontime:0,missed:0,startOnTime:0,startLate:0,endOnTime:0,endLate:0,fineCount:0,fineAmount:0,missions:[],fines:[]} ]));
+ const completed=missions.filter(m=>m.status==='Closed'&&per.has(m.driverId)&&periodMatch(m.actualEnd));
+ for(const m of completed){const p=per.get(m.driverId);p.missionCount++;p.hours+=(+m.actualEnd- +m.actualStart)/HOUR;p.km+=m.odoEnd-m.odoStart;p.missions.push(m);}
+ // Only Closed missions are evaluated. A mission is compliant only when
+ // successful activation is strictly BEFORE planned start AND actual end DATE
+ // is on or before the planned end DATE. If both checks fail, it is one late mission.
+ const scheduled=completed;
+ let ontime=0,late=0,missed=0,startOnTime=0,endOnTime=0,startLate=0,endLate=0;
+ for(const m of scheduled){
+  const p=per.get(m.driverId);
+  const startOK=!!(m.rfid&&m.planned&&m.rfid<m.planned);
+  const endOK=!!(m.actualEnd&&m.plannedEnd&&toDateOnly(m.actualEnd)<=toDateOnly(m.plannedEnd));
+  if(startOK){p.startOnTime++;startOnTime++;}else{p.startLate++;startLate++;}
+  if(endOK){p.endOnTime++;endOnTime++;}else{p.endLate++;endLate++;}
+  if(startOK&&endOK){p.ontime++;ontime++;}else{p.late++;late++;}
+ }
+ const closedMissionIds=new Set(completed.map(m=>m.id));
+ const ff=fines.filter(f=>periodMatch(f.offense)&&closedMissionIds.has(f.missionId));let fineAmount=0;
+ for(const f of ff){const p=per.get(f.driverId);p.fineCount++;p.fineAmount+=f.amount;p.fines.push(f);fineAmount+=f.amount;}
+ let totalKM=0,totalHours=0,used=0;
+ for(const p of per.values()){totalKM+=p.km;totalHours+=p.hours;if(p.missionCount>0)used++;}
+ const eligible=ontime+late;
+ return{per,list:[...per.values()],driverCount:roster.length,completed,scheduled,ff,ontime,late,missed,startOnTime,endOnTime,startLate,endLate,eligible,rate:eligible?ontime/eligible*100:0,totalKM,totalHours,used,fineAmount};
+}
+let model=aggregate();
+const FINE_MIN_KM=2500;
+function comparisonPeriod(){
+ const duration=daysBetween(state.from,state.to)+1;
+ const end=new Date(state.from);end.setDate(end.getDate()-1);
+ const start=new Date(state.from);start.setDate(start.getDate()-duration);
+ return {start,end,metrics:aggregate(start,end)};
+}
+function compareMetric(current,previous,mode='percent',goodDirection='neutral'){
+ if(previous===0 && current===0)return '<span class="variance flat">—</span><span class="varianceNote">vs previous period</span>';
+ if(mode==='pp'){
+  const difference=current-previous;
+  const polarity=difference>0?'up':difference<0?'down':'flat';
+  return `<span class="variance ${polarity}">${difference>0?'▲':difference<0?'▼':'—'} ${Math.abs(difference).toFixed(1)} pp</span><span class="varianceNote">vs previous period</span>`;
+ }
+ if(previous===0)return '<span class="variance flat">New</span><span class="varianceNote">vs previous period</span>';
+ const delta=(current-previous)/previous*100;
+ const polarity=delta>0?(goodDirection==='lower'?'down':'up'):delta<0?(goodDirection==='lower'?'up':'down'):'flat';
+ return `<span class="variance ${polarity}">${delta>0?'▲':delta<0?'▼':'—'} ${Math.abs(delta).toFixed(1)}%</span><span class="varianceNote">vs previous period</span>`;
+}
+function ratePer1000(p){return p.km>=FINE_MIN_KM?p.fineCount*1000/p.km:null;}
+function rateRanks(selector){
+ const eligible=model.list.filter(p=>ratePer1000(p)!==null);
+ const ranked=[...eligible].sort((a,b)=>ratePer1000(b)-ratePer1000(a)||b.fineCount-a.fineCount||a.id.localeCompare(b.id));
+ const max=Math.max(1,...ranked.map(ratePer1000));
+ $(selector).innerHTML=ranked.length?ranked.slice(0,5).map((p,i)=>`<div class="rankline" tabindex="0" role="button" data-driver="${p.id}" title="${safe(p.name)} — ${p.fineCount} fines / ${trunc(p.km)} km"><div class="ranktop"><span class="rankname">${i+1}. ${safe(p.name)}</span><span class="rankvalue">${ratePer1000(p).toFixed(2)}</span></div><div class="barbg"><div class="barfill risk" style="width:${ratePer1000(p)/max*100}%"></div></div></div>`).join(''):'<div class="noEligibility">No drivers meet the 2,500 km minimum</div>';
+}
+function readyPct(p){const denominator=p.ontime+p.late+p.missed;return denominator?p.ontime/denominator*100:null;}
+function timeSeries(metric){
+ let result=[],start=new Date(state.from.getFullYear(),state.from.getMonth(),1);let end=new Date(state.to.getFullYear(),state.to.getMonth(),1);
+ for(let d=new Date(start);d<=end;d.setMonth(d.getMonth()+1)){
+  const date=new Date(d),label=shortMonth(date),selected=model.completed.filter(m=>m.actualEnd.getFullYear()===d.getFullYear()&&m.actualEnd.getMonth()===d.getMonth());
+  const val=metric==='missions'?selected.length:metric==='km'?selected.reduce((s,m)=>s+(m.odoEnd-m.odoStart),0):selected.reduce((s,m)=>s+(+m.actualEnd- +m.actualStart)/HOUR,0);
+  const monthStart=new Date(date.getFullYear(),date.getMonth(),1);
+  const nextMonth=new Date(date.getFullYear(),date.getMonth()+1,1);
+  const monthEnd=new Date(+nextMonth-DAYS);
+  const partial=state.from>monthStart||state.to<monthEnd;
+  result.push({date,label,value:val,partial});
+ }
+ return result;
+}
+function readySeries(){
+ const monthsList=timeSeries('missions');return monthsList.map(({date,label})=>{const mm=model.scheduled.filter(m=>m.actualEnd.getFullYear()===date.getFullYear()&&m.actualEnd.getMonth()===date.getMonth());let on=mm.filter(m=>m.rfid&&m.planned&&m.rfid<m.planned&&m.actualEnd&&m.plannedEnd&&toDateOnly(m.actualEnd)<=toDateOnly(m.plannedEnd)).length;return{date,label,value:mm.length?100*on/mm.length:0,total:mm.length};});
+}
+function segment(where,options,value,onClick){const el=typeof where==='string'?document.querySelector(`[data-seg="${where}"]`):where;if(!el)return;el.innerHTML=options.map(o=>`<button type="button" class="${value===o.id?'selected':''}" data-opt="${o.id}" aria-pressed="${value===o.id}">${o.label}</button>`).join('');el.querySelectorAll('button').forEach(b=>b.onclick=()=>onClick(b.dataset.opt));}
+const utilOpts=[{id:'hours',label:'Mission Hours'},{id:'km',label:'KM'},{id:'missions',label:'Missions'}],trendOpts=[{id:'missions',label:'Missions'},{id:'km',label:'KM'},{id:'hours',label:'Hours'}],fineOpts=[{id:'count',label:'No. of Fines'},{id:'amount',label:'Fine Amount'}];
+function miniLineSVG(series,color,metric){
+ const w=220,h=246,L=31,R=10,T=17,B=30,plotW=w-L-R,plotH=h-T-B;
+ const max=Math.max(1,...series.map(d=>d.value));
+ const magnitude=max>=1000?1000:max>=100?100:max>=10?10:1;
+ const ceiling=Math.max(1,Math.ceil(max/magnitude)*magnitude);
+ const x=i=>L+(series.length<=1?plotW/2:i*plotW/(series.length-1));
+ const y=v=>T+plotH*(1-v/ceiling);
+ const compact=v=>v>=1000000?`${+(v/1000000).toFixed(1)}M`:v>=1000?`${+(v/1000).toFixed(1)}k`:`${Math.round(v)}`;
+ const points=series.map((d,i)=>[x(i),y(d.value)]);
+ const path=points.map(([px,py],i)=>`${i?'L':'M'}${px.toFixed(1)},${py.toFixed(1)}`).join(' ');
+ const grid=[0,.5,1].map(f=>{const val=ceiling*f,py=y(val);return `<line x1="${L}" y1="${py}" x2="${w-R}" y2="${py}" stroke="#dfe8f1" stroke-width="1" stroke-dasharray="3 5"/><text x="${L-5}" y="${py+3.5}" text-anchor="end" fill="#8795a7" font-size="10">${compact(val)}</text>`;}).join('');
+ const n=series.length, labelCount=n<=6?n:Math.min(5,n);
+ const indexes=new Set(Array.from({length:labelCount},(_,i)=>Math.round(i*(n-1)/(labelCount-1||1))));
+ const labels=series.map((d,i)=>indexes.has(i)?`<text x="${x(i)}" y="${h-8}" text-anchor="middle" fill="#687b96" font-size="10.5" font-weight="600">${safe(months[d.date.getMonth()])}</text>`:'').join('');
+ const dots=series.map((d,i)=>{
+   const prior=i?series[i-1]:null;
+   const change=prior&&prior.value>0&&!prior.partial&&!d.partial?` | vs previous month: ${d.value>=prior.value?'+':''}${((d.value-prior.value)/prior.value*100).toFixed(1)}%`:'';
+   const fullValue=metric==='hours'?`${trunc(d.value,1)} hours`:metric==='km'?`${trunc(d.value)} km`:`${trunc(d.value)} missions`;
+   const tip=`${months[d.date.getMonth()]} ${d.date.getFullYear()}: ${fullValue}${change}`;
+   return `<circle cx="${x(i)}" cy="${y(d.value)}" r="4" fill="white" stroke="${color}" stroke-width="2.5"><title>${safe(tip)}</title></circle>`;
+ }).join('');
+ return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Monthly ${safe(metric)} trend" preserveAspectRatio="xMidYMid meet">${grid}<path d="${path}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
+}
+function activityBoard(){
+ const specs=[
+  {id:'missions',title:'Closed Missions',value:trunc(model.completed.length),unit:'Missions',color:'#4777e8',cls:'accentBlue'},
+  {id:'km',title:'Kilometres',value:trunc(model.totalKM),unit:'KM',color:'#168b7b',cls:'accentTeal'},
+  {id:'hours',title:'Mission Hours',value:trunc(model.totalHours,1),unit:'Hours',color:'#7564ba',cls:'accentViolet'}
+ ];
+ return specs.map(s=>`<div class="trendMetric"><div class="activityMetricHead"><h4>${s.title}</h4><span class="activityColorDot" style="background:${s.color}"></span></div><div class="trendMeta"><span class="trendValue ${s.cls}">${s.value}</span><span class="activityUnit">${s.unit} in period</span></div><div class="chartArea">${miniLineSVG(timeSeries(s.id),s.color,s.id)}</div></div>`).join('');
+}
+function rankOf(p,metric){return metric==='hours'?p.hours:metric==='km'?p.km:p.missionCount;}
+function niceMetric(v,metric){return metric==='hours'?`${trunc(v,1)} h`:metric==='km'?`${trunc(v)} km`:`${trunc(v)}`;}
+function ranks(list,metric,selector,color,low=false){
+ const sorted=[...list].sort((a,b)=>low?rankOf(a,metric)-rankOf(b,metric)||a.id.localeCompare(b.id):rankOf(b,metric)-rankOf(a,metric)||a.id.localeCompare(b.id));
+ const top=sorted.slice(0,5),max=Math.max(1,...list.map(p=>rankOf(p,metric)));
+ $(selector).innerHTML=top.map((p,i)=>`<div class="rankline" tabindex="0" role="button" data-driver="${p.id}" title="${safe(p.name)} · ${p.id}"><div class="ranktop"><span class="rankname">${i+1}. ${safe(p.name)}</span><span class="rankvalue">${niceMetric(rankOf(p,metric),metric)}</span></div><div class="barbg"><div class="barfill ${color}" style="width:${rankOf(p,metric)/max*100}%"></div></div></div>`).join('');
+}
+function fineRanks(list,metric,selector,color,low=false){
+ const value=p=>metric==='count'?p.fineCount:p.fineAmount;
+ const sorted=[...list].sort((a,b)=>low?value(a)-value(b)||a.id.localeCompare(b.id):value(b)-value(a)||a.id.localeCompare(b.id));
+ const top=sorted.slice(0,5),max=Math.max(1,...list.map(value));
+ $(selector).innerHTML=top.map((p,i)=>`<div class="rankline" role="button" tabindex="0" data-driver="${p.id}"><div class="ranktop"><span class="rankname">${i+1}. ${safe(p.name)}</span><span class="rankvalue">${metric==='count'?value(p):'AED '+trunc(value(p))}</span></div><div class="barbg"><div class="barfill ${color}" style="width:${value(p)/max*100}%"></div></div></div>`).join('');
+}
+function lineSVG(series,color='#477db6',height=200){
+ const w=540,h=height,ml=41,mr=12,mt=12,mb=30,iw=w-ml-mr,ih=h-mt-mb;
+ const max=Math.max(1,...series.map(x=>x.value)),roundedMax=max<=10?10:Math.ceil(max/(max>1000?1000:max>100?100:10))*(max>1000?1000:max>100?100:10);
+ const sx=i=>ml+(series.length===1?iw/2:i*iw/(series.length-1)),sy=v=>mt+ih*(1-v/roundedMax);
+ const coords=series.map((v,i)=>[sx(i),sy(v.value)]),line=coords.map(([x,y],i)=>`${i?'L':'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+ const area=`${line} L ${coords.length?coords[coords.length-1][0]:ml} ${mt+ih} L ${coords.length?coords[0][0]:ml} ${mt+ih} Z`;
+ const grid=Array.from({length:5},(_,i)=>{const val=roundedMax*i/4,y=sy(val);return`<line x1="${ml}" y1="${y}" x2="${w-mr}" y2="${y}" stroke="#e8eef3" stroke-dasharray="3 5"/><text x="${ml-8}" y="${y+3}" fill="#9aa7b6" font-size="10" text-anchor="end">${val>=1000?`${(val/1000).toFixed(0)}k`:trunc(val)}</text>`;}).join('');
+ const labels=series.map((v,i)=>`<text x="${sx(i)}" y="${h-4}" text-anchor="middle" fill="#8a99aa" font-size="10">${safe(v.label)}</text>`).join('');
+ const points=series.map((v,i)=>`<circle cx="${sx(i)}" cy="${sy(v.value)}" r="3.6" fill="${color}" stroke="white" stroke-width="1.8"><title>${safe(v.label)}: ${trunc(v.value,1)}</title></circle>`).join('');
+ return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Monthly trend"><defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${color}" stop-opacity=".18"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#trendFill)"/><path d="${line}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${points}${labels}</svg>`;
+}
+
+function calcRule(title,formula,example,explanation=''){
+ return `<div class="calcRule"><h3>${title}</h3>${formula?`<div class="calcFormula">${formula}</div>`:''}<div class="calcExample"><strong>Worked example</strong><div>${example}</div></div>${explanation?`<p>${explanation}</p>`:''}</div>`;
+}
+function helpGuide(topic){
+ const previous=calcRule('Previous period — equal duration','Reporting days = calendar days From through To, inclusive. Previous period ends the day before From and contains exactly the same number of days.','Current: 01-Jul-2026 to 30-Jul-2026 = 30 days; previous: 01-Jun-2026 to 30-Jun-2026 = 30 days. Both use the same Unit.','A four-month date range is compared with the immediately preceding equal-length period, not automatically with last year. No days overlap.');
+ const variation=calcRule('Change against previous period','Change % = ((Current value − Prior value) ÷ Prior value) × 100. For a rate, show percentage-point difference: Current rate % − Prior rate %.','Closed missions: 120 now, 100 before → +20.0%. Fines: AED 800 now, AED 1,000 before → −20.0%. Compliance rate: 92% now versus 88% before → +4.0 percentage points (pp).','If previous = 0 and current > 0, show “New”; if both are zero, show “—”. Higher workload is not automatically a performance improvement.');
+ const availability=calcRule('Driver Availability by Location — as of current date/time','For each Unit: Total Drivers = assigned roster count; On Mission = distinct drivers currently on an active mission; Available = Total Drivers − On Mission; Availability % = Available ÷ Total × 100.','Unit A has 30 drivers; 6 are on active missions. Available = 30 − 6 = 24 and availability is 24 ÷ 30 × 100 = 80%. The totals across Unit A–D reconcile to All Units.','This uses the current date and time, not historical From/To values. Changing the reporting period and clicking Apply refreshes the timestamp. Since no absence or duty-unavailable flag exists, drivers not on active missions count as Available. The prototype uses simulated records.');
+ const overview=calcRule('Driver Overview — as of current date','Total Drivers = all registered drivers assigned to the selected Unit. On Mission = number of distinct drivers currently on active missions. Available = Total Drivers − On Mission.','For Unit A, there are 30 drivers and three different drivers currently have active missions: On Mission = 3; Available = 30 − 3 = 27.','Uses the current date/time rather than the From/To reporting dates. A driver with multiple active mission records is counted once. Because leave and absence flags are not available, “Available” currently means “not on a mission”; it is not proof of duty availability.');
+ const utilized=calcRule('Drivers Utilized — first-row KPI','Utilized Drivers = distinct drivers in selected Unit who have at least one Closed mission with Actual End date within the chosen inclusive date range. Utilized % = Utilized Drivers ÷ Total Drivers × 100. Zero Closed Missions = Total − Utilized.','If 24 of 30 drivers have Closed missions, the card shows 24 / 30; utilized share = 24 ÷ 30 × 100 = 80%; no Closed missions = 6. If the previous period had 20 utilized drivers, count change = (24 − 20) ÷ 20 × 100 = +20%.','A driver with only In Progress missions is counted as having no Closed missions for the selected period. This is not percentage of available working hours; no shift-hours data exists.');
+ const missions=calcRule('Closed Missions — first-row KPI','Closed Missions = count of unique mission records with Status = Closed and Actual End date between From and To (inclusive).','Request R-101 has two separate Closed missions; request R-102 has one: three Closed missions, not two requests. Current = 110; previous = 100 → +10.0%.','Created, In Progress, Rejected, Cancelled and other non-Closed statuses are excluded. Missions are assigned to the month of their actual end, even if they started earlier.');
+ const km=calcRule('Total KM Travelled — first-row KPI','Distance for each Closed mission = End Odometer − Start Odometer. Total KM = sum of distances for Closed missions ending in the date range.','Mission A: 12,850 − 12,700 = 150 km; Mission B: 22,340 − 22,190 = 150 km; total 300 km. Prior total 250 km → (300 − 250) ÷ 250 × 100 = +20.0%.','Invalid or negative odometer differences would require correction in production; the demo records contain valid readings.');
+ const hours=calcRule('Total Mission Hours — first-row KPI','Elapsed Mission Hours = (Actual End date/time − Actual Start date/time) in hours; add durations across Closed missions ending in the range.','Mission A: 08:00 to 12:30 = 4.5 hours; Mission B: 14:00 to 16:00 = 2.0 hours. Total = 6.5 hours. Prior 5.0 hours → +30.0%.','Includes waiting and elapsed mission time, not solely driving or scheduled shift time. Actual mission start is represented by the successful vehicle activation time in the prototype.');
+ const schedule=calcRule('Mission Schedule Compliance — zero tolerance','Start passes when Successful Activation Date/Time < Planned Start Date/Time. End passes when DATE(Actual End) ≤ DATE(Planned End), regardless of clock time. Overall compliant = Start passes AND End passes. Compliance % = Overall-compliant Closed missions ÷ All evaluated Closed missions × 100.','Planned Start 08:00, activation 07:59 → start ON TIME; activation 08:00 → start LATE. Planned End 25-Oct at 14:00, actual end 25-Oct at 23:59 → end ON TIME (same date); actual end 26-Oct at 00:01 → end LATE. A mission failing either or both checks is one delayed mission.','The denominator is all Closed missions ending within the selected date range and Unit; in the demo, each has recorded planned/actual timestamps. Missing activation or planned-end fields fail their respective checks. A Closed record missing an actual end date cannot be assigned to a reporting period and must be corrected before aggregation.');
+ const complianceExample=calcRule('Start, end, overall and drivers with delays','Start % = missions passing start check ÷ Closed missions × 100. End % = missions passing end-date check ÷ Closed missions × 100. Overall % = missions passing BOTH checks ÷ Closed missions × 100. Drivers with Delays = number of distinct drivers with ≥1 mission failing either check.','Five Closed missions: M1 passes both; M2 starts late; M3 ends on a later date; M4 fails both; M5 passes both. Start = 3/5 = 60%; End = 3/5 = 60%; Overall = 2/5 = 40%; Delayed missions = 3 (not 4). If M2, M3 and M4 belong to two different drivers, Drivers with Delays = 2.','A driver with even ONE delayed mission appears in the delayed-driver drill-down. Late starts and late ends can overlap; never add those counts to calculate delayed missions. The result measures mission schedule compliance, not definitive personal fault.');
+ const readinessVariance=calcRule('Compliance vs previous period (pp)','Percentage-point difference = Current overall compliance % − Previous overall compliance %.','Current: 90 compliant out of 100 Closed missions = 90%. Previous: 85 out of 100 = 85%. The KPI badge displays +5.0 pp, not +5%.','Use the same selected Unit and same-length previous period. Comparing a rate uses percentage points; comparing counts uses percentage change.');
+ const fineAmount=calcRule('Traffic Fine Amount — first-row KPI','Sum AED amounts of fines whose offense date lies in the selected range AND whose linked mission is Closed with actual end date within that range.','Two eligible fines of AED 300 and AED 500 give AED 800. Previous period had AED 1,000 → (800 − 1,000) ÷ 1,000 × 100 = −20.0%.','Counts are based on individual fine records, not drivers fined. Fines are entered only after the mission is Closed; the current dashboard retains the agreed period restriction on both fine offense date and mission end date.');
+ const utilization=calcRule('Driver Utilization — most, least and zero missions','For each driver with Closed missions ending within the report range, calculate Mission Hours = sum(actual end − actual start), KM = sum(end − start odometer), and Missions = count(Closed mission IDs). Select one metric for BOTH Most and Least rankings.','Ahmed: 60 h, 1,150 km, 8 missions; Ravi: 24 h, 400 km, 3 missions. On Mission Hours, Ahmed ranks higher. A driver with zero Closed missions ranks in Least Utilized (0 h / 0 km / 0 missions).','Top/bottom rankings show five drivers. Ties use Driver ID ascending. The “No missions” number means zero Closed missions within the filter—not no work ever, or a confirmed lack of assignments.');
+ const activity=calcRule('Monthly Driver Activity Trend — three graphs','For each included calendar month, take Closed missions by Actual End month. Missions = count; KM = sum(end odometer − start odometer); Hours = sum(actual end − actual start in hours).','Three July Closed missions: distances 100 + 150 + 250 = 500 km; durations 2 + 3 + 5 = 10 h. The July charts show 3 missions, 500 km and 10 h. A mission that starts in July but closes in August belongs entirely to August.','Each graph uses its own vertical scale. Hover over a point for month, actual value and month-over-month change when both months are complete and the prior value is nonzero. The first and last months can contain partial data if the date range begins or ends mid-month; no visual partial-month labels are shown.');
+ const fines=calcRule('Traffic Fines — rankings, repeat offenders and eligibility','Fine Count = number of eligible fine records; Fine Amount = their AED sum. Repeat Offender = driver with 2 or more fines. Fine Rate per 1,000 KM = Fine Count ÷ Closed-mission KM × 1,000; include rate-ranking drivers only if KM ≥ 2,500.','A driver has 3 eligible fines totaling AED 1,200 and 6,000 km: rate = 3 ÷ 6,000 × 1,000 = 0.50 fines per 1,000 km. If 42 of 120 drivers drive at least 2,500 km, the label says “42 of 120 drivers eligible.”','The Fine Count / Fine Amount switch changes the highest-fines ranking, not the rate graph. Fine count and mission KM are computed within the same selected Unit and reporting dates. The 2,500 km threshold is a prototype comparison rule, not a safety certification.');
+ const workforce=calcRule('Workforce & Licence Compliance — selected Unit','Licence categories = counts of drivers recorded as Sedan, SUV or People Movers. Experience groups are <5 years, ≥5 and <10 years, and ≥10 years. Expired by report end = expiry < report To. Expiring within 90 days = report To ≤ expiry ≤ report To + 90 days.','For report end 25-Oct-2026: expiry 24-Oct = expired; expiry 25-Oct = within 90 days; expiry 01-Dec = within 90 days; expiry 01-May-2027 = neither. Experience of 4.9 years → 0–5; 5.0 → 5–10; 10.0 → 10+.','Workforce counts refer to the selected Unit’s entire driver roster, including drivers with no Closed missions. A driver contributes to exactly one experience group and one recorded licence category in this prototype.');
+ const topics={
+  // The top-right icon explains ONLY the seven first-row cards.
+  all:['First-row KPI calculation guide',[overview,utilized,missions,km,hours,schedule+complianceExample+readinessVariance,fineAmount]],
+  overview:['Driver Overview — As of Current Date',[overview]],
+  availability:['Driver Availability by Location',[availability]],
+  utilized:['Drivers Utilized — Calculation',[utilized,previous,variation]],
+  missions:['Closed Missions — Calculation',[missions,previous,variation]],
+  km:['Total KM Travelled — Calculation',[km,previous,variation]],
+  hours:['Total Mission Hours — Calculation',[hours,previous,variation]],
+  readinessKpi:['On-Time Compliance — Calculation',[schedule,complianceExample,readinessVariance,previous]],
+  fineAmount:['Traffic Fine Amount — Calculation',[fineAmount,previous,variation]],
+  utilization:['Driver Utilization — Rankings and Participation',[utilization,utilized,previous]],
+  readiness:['Mission Schedule Compliance — Start, End Date, Overall and Delays',[schedule,complianceExample,readinessVariance,previous]],
+  fines:['Traffic Fines — Exposure and Rankings',[fines,fineAmount,previous]],
+  activity:['Monthly Driver Activity Trend — Calculations',[activity,missions,km,hours]],
+  workforce:['Workforce & Licence Compliance — Calculations',[workforce]]
+ };
+ return topics[topic]||topics.all;
+}
+
+let previousInfoFocus=null;
+function openInfo(topic,trigger){
+ const [title,sections]=helpGuide(topic);
+ previousInfoFocus=trigger||document.activeElement;
+ $('infoTitle').textContent=title;
+ $('infoBody').innerHTML=sections.join('')+(topic==='all'?'<p class="infoFootnote">All examples are illustrative. The dashboard figures are calculated from simulated records; actual production values depend on the VMS data.</p>':'<p class="infoFootnote">Illustrative worked examples; dashboard totals use the selected unit and actual demo records.</p>');
+ $('rulesOverlay').classList.add('show');
+ $('rulesOverlay').setAttribute('aria-hidden','false');
+ document.body.style.overflow='hidden';
+ $('rulesOverlay').querySelector('[data-close]').focus();
+}
+
+function statCard(s){return `<div tabindex="0" role="button" class="stat ${s.cls}" data-view="${s.view}" title="${safe(s.sub)}"><div class="statNameRow"><div class="stat-name">${s.title}</div><button type="button" class="infoTrigger statInfo" data-info="${s.info}" aria-label="How ${s.title} is calculated" title="How ${s.title} is calculated"><svg class="icon"><use href="#i-info"/></svg></button></div><div class="stat-num">${s.value}</div><div class="stat-foot">${s.variance}</div></div>`;}
+function renderAvailability(){
+ const units=state.unit==='All Units'?['Unit A','Unit B','Unit C','Unit D']:[state.unit];
+ $('availabilityStamp').textContent=`As of ${dateTimeLabel(availabilityAsOf)}`;
+ $('availabilityRows').innerHTML=units.map(unit=>{
+   const v=currentDriverOverview(unit), percent=v.total?v.available/v.total*100:0;
+   return `<div class="availItem"><div class="availHeader"><span>${safe(unit)}</span><span>${v.available} Available · ${v.onMission} On Mission (${percent.toFixed(1)}%)</span></div><div class="availBar" role="img" aria-label="${safe(unit)}: ${v.available} available of ${v.total}"><div class="good" style="width:${percent}%"></div><div class="busy"></div></div></div>`;
+ }).join('');
+}
+function renderOverview(){
+ const prev=comparisonPeriod().metrics;
+ const rate=model.eligible?`${model.rate.toFixed(1)}%`:'—';
+ const items=[
+  {cls:'s1',title:'Drivers Utilized',info:'utilized',value:`${model.used} / ${model.driverCount}`,sub:`${(model.used/model.driverCount*100).toFixed(1)}% with closed missions`,variance:compareMetric(model.used,prev.used),view:'utilization',icon:'users'},
+  {cls:'s2',title:'Closed Missions',info:'missions',value:trunc(model.completed.length),sub:'Across selected reporting period',variance:compareMetric(model.completed.length,prev.completed.length),view:'activity',icon:'check'},
+  {cls:'s3',title:'Total KM Travelled',info:'km',value:trunc(model.totalKM),sub:'Based on odometer readings',variance:compareMetric(model.totalKM,prev.totalKM),view:'utilization',icon:'route'},
+  {cls:'s4',title:'Total Mission Hours',info:'hours',value:trunc(model.totalHours),sub:'Elapsed mission duration',variance:compareMetric(model.totalHours,prev.totalHours),view:'activity',icon:'clock'},
+  {cls:'s5',title:'On-Time Compliance',info:'readinessKpi',value:rate,sub:`${trunc(model.ontime)} of ${trunc(model.eligible)} closed missions`,variance:compareMetric(model.rate,prev.rate,'pp'),view:'readiness',icon:'shield'},
+  {cls:'s6',title:'Traffic Fine Amount',info:'fineAmount',value:`AED ${trunc(model.fineAmount)}`,sub:`${model.ff.length} fine events in reporting period`,variance:compareMetric(model.fineAmount,prev.fineAmount,'percent','lower'),view:'fines',icon:'alert'}
+ ];
+ $('statCards').innerHTML=driverOverviewCard()+items.map(statCard).join('');
+ renderAvailability();
+ segment('util',utilOpts,state.util,id=>{state.util=id;renderOverview();if(state.view==='utilization')renderFocus();});
+ ranks(model.list,state.util,'highUtil','',false);ranks(model.list,state.util,'lowUtil','low',true);
+ $('zeroDriverCount').textContent=model.driverCount-model.used;
+ $('activityMulti').innerHTML=activityBoard();
+ const circ=2*Math.PI*46;$('readyDonut').innerHTML=`<svg viewBox="0 0 114 114"><circle cx="57" cy="57" r="46" stroke="#ecf1f4" stroke-width="10" fill="none"/><circle cx="57" cy="57" r="46" stroke="#168b7b" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-model.rate/100)}"/></svg><div class="donutcenter"><div class="donutVal">${model.eligible?model.rate.toFixed(1)+'%':'—'}</div><div class="donutCap">Both checks pass</div></div>`;
+ $('lateNum').textContent=trunc(model.late);$('repeatDelayCount').textContent=trunc(model.list.filter(p=>p.late>=1).length);
+ $('scheduleBreakdown').innerHTML=`<div class="complianceMini"><span>On-time start</span><strong>${model.eligible?(model.startOnTime/model.eligible*100).toFixed(1)+'%':'—'}</strong></div><div class="complianceMini"><span>On-Time End</span><strong>${model.eligible?(model.endOnTime/model.eligible*100).toFixed(1)+'%':'—'}</strong></div>`;
+ $('repeatDelayBtn').onclick=e=>{e.stopPropagation();changeView('readiness');state.repeatDelayOnly=true;renderFocusTable();};
+ const rseries=readySeries();$('readyMonths').innerHTML=rseries.map(m=>`<div class="rmonth"><span class="mon">${months[m.date.getMonth()]}</span><span class="track"><span style="display:block;width:${m.value}%;height:100%;background:#2da28f;border-radius:8px"></span></span><span class="pct">${m.total?m.value.toFixed(1)+'%':'—'}</span></div>`).join('');
+ segment('fine',fineOpts,state.fine,id=>{state.fine=id;renderOverview();if(state.view==='fines')renderFocus();});
+ $('finesSummary').innerHTML=`<div class="smStat"><strong>${trunc(model.ff.length)}</strong> Violations</div><div class="smStat"><strong>AED ${trunc(model.fineAmount)}</strong> Fines</div><button type="button" id="repeatDriversBtn" class="repeatStat" title="View drivers with two or more fines"><strong>${model.list.filter(x=>x.fineCount>=2).length}</strong> Repeat offenders</button>`;
+ $('fineEligibility').innerHTML=`<strong>${model.list.filter(p=>ratePer1000(p)!==null).length} of ${model.driverCount} drivers eligible</strong> · Minimum 2,500 km from Closed missions`;
+ fineRanks(model.list,state.fine,'highFine','risk');rateRanks('lowFine');
+ $('repeatDriversBtn').onclick=e=>{e.stopPropagation();changeView('fines');state.repeatOnly=true;renderFocusTable();};
+ const counts=categories.map(cat=>({cat,value:model.list.filter(d=>d.category===cat).length}));const max=Math.max(1,...counts.map(c=>c.value));
+ $('licenseBars').innerHTML=counts.map(c=>`<div class="catRow"><div class="catlab">${c.cat}</div><div class="catmeter"><div style="width:${c.value/max*100}%"></div></div><strong class="catnum">${c.value}</strong></div>`).join('');
+ const buckets=[model.list.filter(d=>d.experience<5).length,model.list.filter(d=>d.experience>=5&&d.experience<10).length,model.list.filter(d=>d.experience>=10).length],ebmax=Math.max(1,...buckets);
+ $('experienceBars').innerHTML=buckets.map((val,i)=>`<div class="expbarItem"><span class="expVal">${val}</span><div class="expBarTrack"><div class="expcolumn" style="height:${ebmax?Math.max(3,100*val/ebmax):0}%;background:${['#a1b6db','#90a5d6','#b7a3d4'][i]}"></div></div><div class="expLabel">${['0–5 yrs','5–10 yrs','10+ yrs'][i]}</div></div>`).join('');
+ const expired=model.list.filter(d=>d.expiry<state.to).length,expiring=model.list.filter(d=>daysBetween(state.to,d.expiry)>=0&&daysBetween(state.to,d.expiry)<=90).length;
+ $('expiredCount').textContent=expired;$('expiringCount').textContent=expiring;
+ attachDriverClicks($('overview'));
+}
+function attachDriverClicks(root){root.querySelectorAll('[data-driver]').forEach(e=>{e.addEventListener('click',()=>openDriver(e.dataset.driver));e.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openDriver(e.dataset.driver);}});});}
+const focusDescriptions={utilization:'Compare closed-mission hours, distance and mission counts. Zero-mission drivers remain visible so underutilized capacity can be investigated.',activity:'Track closed-mission workload trends and compare monthly kilometres, mission counts and mission hours across the selected time range.',readiness:'A Closed mission is on schedule only when activation is before planned start and the actual end date is no later than the planned end date. A single failed condition counts as one delayed mission; every driver with one or more delays appears in the list.',fines:'Review traffic fine counts, AED amounts and exposure-adjusted context. Fines use offense date and do not imply accident history.',workforce:'Review driving experience, recorded license categories and expiry risk as of the selected reporting end date.'};
+const focusTitles={utilization:'Driver Utilization',activity:'Mission Activity',readiness:'Mission Schedule Compliance',fines:'Traffic Fines & Exposure',workforce:'Workforce & License Compliance'};
+function changeView(view){state.zeroOnly=false;state.repeatOnly=false;state.repeatDelayOnly=false;state.view=view;$('overview').classList.toggle('hide',view!=='overview');$('focus').classList.toggle('show',view!=='overview');$('pageTitle').textContent='Driver Performance';document.body.classList.toggle('landing-mode',view==='overview');if(view!=='overview')renderFocus();window.scrollTo({top:0,behavior:'instant'});}
+function percentage(v){return v===null?'—':v.toFixed(1)+'%';}
+function driverSort(view){const a=[...model.list];if(view==='utilization')a.sort((x,y)=>rankOf(y,state.util)-rankOf(x,state.util)||x.id.localeCompare(y.id));if(view==='activity')a.sort((x,y)=>y.missionCount-x.missionCount||x.id.localeCompare(y.id));if(view==='readiness')a.sort((x,y)=>(readyPct(x)??-1)-(readyPct(y)??-1)||x.id.localeCompare(y.id));if(view==='fines')a.sort((x,y)=>(state.fine==='count'?y.fineCount-x.fineCount:y.fineAmount-x.fineAmount)||x.id.localeCompare(y.id));if(view==='workforce')a.sort((x,y)=>x.expiry-y.expiry||x.id.localeCompare(y.id));return a;}
+function tableRow(view,p){const base=`<td class="drivercell"><strong>${safe(p.name)}</strong><small>${p.id}</small></td>`;
+ if(view==='utilization')return `${base}<td>${p.missionCount}</td><td>${trunc(p.hours,1)}</td><td>${trunc(p.km)}</td><td>${model.totalHours?(p.hours/model.totalHours*100).toFixed(1):'0.0'}%</td>`;
+ if(view==='activity')return `${base}<td>${p.missionCount}</td><td>${p.missionCount?(p.hours/p.missionCount).toFixed(1):'—'}</td><td>${p.missionCount?trunc(p.km/p.missionCount):'—'}</td><td>${trunc(p.km)}</td>`;
+ if(view==='readiness'){const total=p.ontime+p.late+p.missed;return `${base}<td>${total}</td><td class="good">${p.ontime}</td><td class="bad">${p.late}</td><td>${p.late>=1?'<span class="pill bad">Yes</span>':'No'}</td><td><span class="pill ${!total?'neutral':readyPct(p)>=90?'good':readyPct(p)>=75?'warn':'bad'}">${percentage(readyPct(p))}</span></td>`;}
+ if(view==='fines')return `${base}<td>${p.fineCount}</td><td>AED ${trunc(p.fineAmount)}</td><td>${trunc(p.km)}</td><td>${ratePer1000(p)===null?'— (low KM)':ratePer1000(p).toFixed(2)}</td>`;
+ const rem=daysBetween(state.to,p.expiry),status=rem<0?'<span class="pill bad">Expired</span>':rem<=90?'<span class="pill warn">Expiring</span>':'<span class="pill good">Valid</span>';
+ return `${base}<td>${p.experience.toFixed(1)} yrs</td><td>${p.category}</td><td>${dateLabel(p.expiry)}</td><td>${status}</td>`;
+}
+const cols={utilization:['Driver','Missions','Hours','KM','Hour Share'],activity:['Driver','Closed Missions','Avg Hours / Mission','Avg KM / Mission','Total KM'],readiness:['Driver','Closed Missions','On Time','Late Missions','Any Delay?','Compliant %'],fines:['Driver','Fine Events','Amount (AED)','Period KM','Fines / 1,000 KM'],workforce:['Driver','Experience','License Category','License Expiry','Status']};
+function renderFocus(){
+ const v=state.view;if(v==='overview')return;
+ $('focusTitle').textContent=focusTitles[v];$('focusDescription').textContent=focusDescriptions[v];$('focusTableTitle').textContent=v==='workforce'?'Driver License Register':v==='fines'?'Fines by Driver':v==='readiness'?'Schedule Compliance by Driver':'Driver Performance Ranking';
+ let viz='',insight='';
+ const barLine=(lbl,val,max,color='#168d80')=>`<div style="margin:13px 0"><div style="display:flex;justify-content:space-between;font-size:12px;color:#52647d;margin-bottom:7px"><span>${lbl}</span><strong>${val.toFixed(1)}%</strong></div><div class="barbg" style="height:10px"><div class="barfill" style="width:${max?val:0}%;background:${color}"></div></div></div>`;
+ if(v==='utilization'){
+  viz=`<h3>Workload distribution</h3><div style="display:flex;justify-content:flex-end;margin-bottom:12px"><div id="focusSeg" class="seg"></div></div><div class="panelbody-split"><div class="splitcol"><div class="minititle">Most utilized drivers</div><div class="ranks" id="focusHigh"></div></div><div class="splitcol"><div class="minititle">Least utilized drivers</div><div class="ranks" id="focusLow"></div></div></div>`;
+  const ordered=[...model.list].sort((a,b)=>b.hours-a.hours);const share=ordered.slice(0,Math.ceil(model.driverCount*.2)).reduce((s,p)=>s+p.hours,0);
+  insight=`<h3>Workload concentration</h3><div style="font-size:34px;font-weight:800;color:#127d73;margin:10px 0">${model.totalHours?(share/model.totalHours*100).toFixed(1):'0'}%</div><p>Share of all closed-mission hours handled by the busiest 20% of registered drivers.</p><p><strong>${model.driverCount-model.used}</strong> drivers recorded no closed missions during the selected period.</p><p><strong>Interpretation:</strong> mission hours include waiting; actual driving time and working-shift availability cannot be determined.</p>`;
+ } else if(v==='activity'){
+  viz=`<h3>Closed-mission activity by month</h3><div style="display:flex;justify-content:flex-end"><div id="focusSeg" class="seg"></div></div><div id="focusChart" style="max-width:950px;margin:13px 0 0"></div>`;
+  const avg=model.completed.length?model.totalHours/model.completed.length:0;
+  insight=`<h3>Activity snapshot</h3><div style="font-size:33px;font-weight:800;color:#517aca;margin:10px 0">${trunc(model.completed.length)}</div><p>Closed missions in the selected reporting period.</p><p><strong>${avg.toFixed(1)} hrs</strong> average elapsed time per closed mission.</p><p><strong>${model.completed.length?trunc(model.totalKM/model.completed.length):0} km</strong> average distance per closed mission.</p><p>Month attribution uses actual completion date. The first and last months may cover fewer days when the selected range starts or ends mid-month; interpret those values accordingly.</p>`;
+ } else if(v==='readiness'){
+  const rs=readySeries();viz=`<h3>Monthly on-time mission compliance %</h3><div style="max-width:900px">${lineSVG(rs,'#15947f',235)}</div><p style="font-size:11px;color:#7d8c9e;margin:14px 0 0">Each Closed mission must pass both the strict start-time check and the end-date-only check. A mission failing both is counted once.</p>`;
+  const eligible=model.eligible;
+  insight=`<h3>Mission Schedule Compliance</h3><div style="font-size:34px;font-weight:800;color:#127d73;margin:10px 0">${eligible?model.rate.toFixed(1)+'%':'—'}</div><p><strong>${model.ontime}</strong> of <strong>${eligible}</strong> Closed missions met both requirements.</p>${barLine('Overall compliant',model.rate,100)}${barLine('On-time starts',eligible?model.startOnTime/eligible*100:0,100,'#4774d7')}${barLine('On-time end dates',eligible?model.endOnTime/eligible*100:0,100,'#9d81c9')}<p><strong>${model.late}</strong> delayed missions; <strong>${model.list.filter(p=>p.late>=1).length}</strong> drivers with at least one delayed mission.</p><p>Start and end failures can overlap. Late completion may depend on operational factors outside the driver's control.</p>`;
+ } else if(v==='fines'){
+  viz=`<h3>Fine exposure and normalized rates</h3><div style="display:flex;justify-content:flex-end;margin-bottom:12px"><div id="focusSeg" class="seg"></div></div><div class="panelbody-split"><div class="splitcol"><div class="minititle">Highest fines</div><div class="ranks" id="focusHigh"></div></div><div class="splitcol"><div class="minititle">Highest fines per 1,000 KM (min 2,500 km)</div><div class="ranks" id="focusLow"></div></div></div>`;
+  insight=`<h3>Fine exposure snapshot</h3><div style="font-size:34px;font-weight:800;color:#bd655c;margin:10px 0">AED ${trunc(model.fineAmount)}</div><p><strong>${model.ff.length}</strong> fine events; <strong>${model.list.filter(x=>x.fineCount>=2).length}</strong> repeat offenders (2+).</p><p><strong>${model.totalKM?(model.ff.length/model.totalKM*1000).toFixed(2):'—'}</strong> fine events per 1,000 completed-mission KM (fleet-wide).</p><p>Fine counts use offense dates and only missions closed in the reporting period. Rate rankings require at least 2,500 km. This is not an accident or safety score.</p>`;
+ }else{
+  const buckets=categories.map(c=>({cat:c,n:model.list.filter(d=>d.category===c).length}));const max=Math.max(1,...buckets.map(x=>x.n));
+  viz=`<h3>Drivers by licensed vehicle category</h3>${buckets.map(c=>`<div style="display:flex;align-items:center;gap:16px;margin:20px 0;font-size:12px;font-weight:700;color:#546981"><div style="width:120px">${c.cat}</div><div class="barbg" style="flex:1;height:16px"><div class="barfill cat" style="width:${c.n/max*100}%"></div></div><span>${c.n}</span></div>`).join('')}<p style="color:#8997a8;font-size:11px;margin-top:25px">Drivers are grouped by their recorded license category. This prototype assumes one recorded category per driver.</p>`;
+  const exp=model.list.filter(d=>d.expiry<state.to).length,due=model.list.filter(d=>daysBetween(state.to,d.expiry)>=0&&daysBetween(state.to,d.expiry)<=90).length;
+  insight=`<h3>License risk & eligibility</h3><div style="display:flex;gap:10px;margin:17px 0"><div style="background:#fff1ed;padding:16px;border-radius:11px;flex:1"><div style="font-size:31px;font-weight:800;color:#c7665d">${exp}</div><div style="font-size:11px;color:#997b78">Expired</div></div><div style="background:#fff8e9;padding:16px;border-radius:11px;flex:1"><div style="font-size:31px;font-weight:800;color:#b88232">${due}</div><div style="font-size:11px;color:#998366">Due in 90 days</div></div></div><p>License expiry is compared to <strong>${dateLabel(state.to)}</strong> (reporting end date), not an inferred current operation.</p><p>Experience bands: under 5, 5 to under 10, and 10 years or more.</p>`;
+ }
+ $('focusViz').innerHTML=viz;$('focusInsight').innerHTML=insight;
+ if(v==='utilization'||v==='fines'){const isUtil=v==='utilization',opt=isUtil?utilOpts:fineOpts,key=isUtil?'util':'fine';segment($('focusSeg'),opt,state[key],id=>{state[key]=id;renderFocus();renderOverview();});if(isUtil){ranks(model.list,state.util,'focusHigh','');ranks(model.list,state.util,'focusLow','low',true);}else{fineRanks(model.list,state.fine,'focusHigh','risk');rateRanks('focusLow');}attachDriverClicks($('focusViz'));}
+ if(v==='activity'){segment($('focusSeg'),trendOpts,state.trend,id=>{state.trend=id;renderFocus();renderOverview();});$('focusChart').innerHTML=lineSVG(timeSeries(state.trend),'#477db6',260);}
+ $('focusThead').innerHTML=`<tr>${cols[v].map(s=>`<th>${s}</th>`).join('')}</tr>`;
+ renderFocusTable();
+}
+function renderFocusTable(){const v=state.view,arr=driverSort(v).filter(p=>`${p.name} ${p.id}`.toLowerCase().includes(state.search.toLowerCase())&&(!state.zeroOnly||p.missionCount===0)&&(!state.repeatOnly||p.fineCount>=2)&&(!state.repeatDelayOnly||p.late>=1));$('focusCount').textContent=`${arr.length} drivers • select a row to inspect mission history`;
+ const quick=$('focusQuickFilter');const applicable=v==='utilization'||v==='fines'||v==='readiness';quick.hidden=!applicable;if(applicable){quick.textContent=v==='utilization'?(state.zeroOnly?'Show all drivers':'Only zero-mission drivers'):v==='fines'?(state.repeatOnly?'Show all drivers':'Only repeat offenders'):(state.repeatDelayOnly?'Show all drivers':'Only drivers with delays');quick.classList.toggle('enabled',state.zeroOnly||state.repeatOnly||state.repeatDelayOnly);} const rows=arr.map(p=>`<tr data-driver="${p.id}">${tableRow(v,p)}</tr>`).join('');$('focusTbody').innerHTML=rows||`<tr><td colspan="8">No matching drivers</td></tr>`;attachDriverClicks($('focusTbody'));}
+function openDriver(id){const p=model.per.get(id);if(!p)return;state.driver=id;state.drawerTab='missions';$('driverTitle').textContent=p.name;$('driverSubtitle').textContent=`${p.id} · ${p.unit} · ${p.category} · ${p.experience.toFixed(1)} years experience`;
+ $('drawerStats').innerHTML=[{n:trunc(p.missionCount),s:'Closed missions'},{n:trunc(p.hours,1),s:'Mission hours'},{n:percentage(readyPct(p)),s:'Schedule compliance'},{n:trunc(p.km),s:'KM travelled'},{n:trunc(p.fineCount),s:'Traffic fines'},{n:'AED '+trunc(p.fineAmount),s:'Fine amount'}].map(x=>`<div class="drawerStat"><strong>${x.n}</strong><small>${x.s}</small></div>`).join('');renderDrawerTab();$('driverOverlay').classList.add('show');document.body.style.overflow='hidden';}
+function renderDrawerTab(){const p=model.per.get(state.driver);$('drawerTabs').innerHTML=[{id:'missions',name:'Missions'},{id:'readiness',name:'Schedule Compliance'},{id:'fines',name:'Fines'},{id:'license',name:'License'}].map(t=>`<button data-tab="${t.id}" class="${state.drawerTab===t.id?'selected':''}">${t.name}</button>`).join('');$('drawerTabs').querySelectorAll('button').forEach(btn=>btn.onclick=()=>{state.drawerTab=btn.dataset.tab;renderDrawerTab();});
+ let html='';if(state.drawerTab==='missions'){
+  const ms=p.missions.sort((a,b)=>b.actualEnd-a.actualEnd);
+  html=`<div style="margin-bottom:12px;color:#8090a0;font-size:11px">Closed missions in selected period (${ms.length}). Mission start is recorded when vehicle activation succeeds.</div><div class="drawerTable"><table><thead><tr><th>Request</th><th>Actual Start</th><th>Actual End</th><th>Hours</th><th>KM</th></tr></thead><tbody>${ms.slice(0,80).map(m=>`<tr><td>${m.request}</td><td>${dateTimeLabel(m.actualStart)}</td><td>${dateTimeLabel(m.actualEnd)}</td><td>${((m.actualEnd-m.actualStart)/HOUR).toFixed(1)}</td><td>${m.odoEnd-m.odoStart}</td></tr>`).join('')}</tbody></table></div>${ms.length?'':'<div class="empty">No closed missions in this period</div>'}`;
+ }else if(state.drawerTab==='readiness'){
+  const ms=model.scheduled.filter(m=>m.driverId===p.id).sort((a,b)=>b.actualEnd-a.actualEnd);
+  html=`<div style="font-size:11px;color:#7a8b9b;margin-bottom:13px">Closed missions only · Start must be activated strictly before the planned time; end is checked by calendar date only. Either failure = delayed mission. No tolerance.</div><div class="drawerTable"><table><thead><tr><th>Request</th><th>Planned Start</th><th>Actual Start</th><th>Start</th><th>Planned End Date</th><th>Actual End Date</th><th>End</th><th>Overall</th></tr></thead><tbody>${ms.slice(0,100).map(m=>{const startOK=!!(m.rfid&&m.rfid<m.planned),endOK=!!(m.actualEnd&&m.plannedEnd&&toDateOnly(m.actualEnd)<=toDateOnly(m.plannedEnd));const pill=ok=>`<span class="pill ${ok?'good':'bad'}">${ok?'On time':'Late'}</span>`;return`<tr><td>${m.request}</td><td>${dateTimeLabel(m.planned)}</td><td>${dateTimeLabel(m.rfid)}</td><td>${pill(startOK)}</td><td>${dateLabel(m.plannedEnd)}</td><td>${dateLabel(m.actualEnd)}</td><td>${pill(endOK)}</td><td>${pill(startOK&&endOK)}</td></tr>`;}).join('')}</tbody></table></div>${ms.length?'':'<div class="empty">No Closed missions in this reporting period</div>'}`;
+ }else if(state.drawerTab==='fines'){
+  html=`<div style="font-size:11px;color:#7a8b9b;margin-bottom:13px">Fines are selected by offense date and must belong to a mission closed in the reporting period.</div><div class="drawerTable"><table><thead><tr><th>Fine No.</th><th>Request / Mission</th><th>Offense Date</th><th>Amount</th></tr></thead><tbody>${p.fines.sort((a,b)=>b.offense-a.offense).map(f=>`<tr><td>${f.id}</td><td>${f.missionId}</td><td>${dateLabel(f.offense)}</td><td>AED ${trunc(f.amount)}</td></tr>`).join('')}</tbody></table></div>${p.fines.length?'':'<div class="empty">No recorded fines in the selected period</div>'}`;
+ }else{
+  const remain=daysBetween(state.to,p.expiry);html=`<div class="driverinfo"><div class="infoCell"><small>Employee ID</small><strong>${p.id}</strong></div><div class="infoCell"><small>Unit</small><strong>${p.unit}</strong></div><div class="infoCell"><small>Licensed vehicle category</small><strong>${p.category}</strong></div><div class="infoCell"><small>Experience</small><strong>${p.experience.toFixed(1)} years</strong></div><div class="infoCell"><small>License expiry</small><strong>${dateLabel(p.expiry)}</strong></div><div class="infoCell"><small>Expiry status as of ${dateLabel(state.to)}</small><strong class="${remain<0?'bad':remain<=90?'warn':'good'}">${remain<0?'Expired':remain<=90?'Expiring within 90 days':'Valid (beyond 90 days)'}</strong></div></div>`;
+ }
+ $('drawerTabContent').innerHTML=html;
+}
+function closeOverlay(id){$(id).classList.remove('show');if(id==='rulesOverlay'){$(id).setAttribute('aria-hidden','true');if(previousInfoFocus?.isConnected)previousInfoFocus.focus();}if(!document.querySelector('.overlay.show'))document.body.style.overflow='';}
+function applyFilters(){let start=parseDisplayDate($('fromDate').value),end=parseDisplayDate($('toDate').value);if(!start||!end||start>end){$('filterError').textContent='Enter a valid range in dd-MMM-yyyy format (From must not exceed To).';return;}if(end>today){$('filterError').textContent='The report end date cannot be in the future.';return;}if(daysBetween(start,end)>730){$('filterError').textContent='Select a range of up to 24 months.';return;}$('filterError').textContent='';state.unit=$('unitFilter').value;state.from=start;state.to=end;availabilityAsOf=new Date();model=aggregate();renderOverview();if(state.view!=='overview')renderFocus();if($('driverOverlay').classList.contains('show')&&state.driver)openDriver(state.driver);}
+function setDefaultDates(){const from=new Date(today.getFullYear(),today.getMonth()-4,today.getDate());$('fromDate').value=dateLabel(from);$('toDate').value=dateLabel(today);}
+function init(){
+ setDefaultDates();$('unitFilter').value=state.unit;$('applyBtn').onclick=applyFilters;
+ for(const id of ['fromDate','toDate'])$(id).addEventListener('input',()=>{$('filterError').textContent='';});
+ document.addEventListener('click',e=>{const info=e.target.closest('[data-info]');if(info){e.preventDefault();e.stopPropagation();openInfo(info.dataset.info,info);return;}const v=e.target.closest('[data-view]');if(v&&v.dataset.view)changeView(v.dataset.view);const c=e.target.closest('[data-close]');if(c)closeOverlay(c.dataset.close);});
+ $('backBtn').onclick=()=>changeView('overview');$('focusQuickFilter').onclick=()=>{if(state.view==='utilization')state.zeroOnly=!state.zeroOnly;else if(state.view==='fines')state.repeatOnly=!state.repeatOnly;else if(state.view==='readiness')state.repeatDelayOnly=!state.repeatDelayOnly;renderFocusTable();};
+ $('zeroDriverBtn').onclick=e=>{e.stopPropagation();changeView('utilization');state.zeroOnly=true;renderFocusTable();};$('driverSearch').addEventListener('input',e=>{state.search=e.target.value;if(state.view!=='overview')renderFocusTable();});
+ 
+ for(const id of ['rulesOverlay','driverOverlay'])$(id).addEventListener('click',e=>{if(e.target===$(id))closeOverlay(id);});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeOverlay('rulesOverlay');closeOverlay('driverOverlay');}});
+ renderOverview();
+}
+init();
+</script>
+</body></html>

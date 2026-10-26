@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fleet Performance</title>
+  <style>
+    :root {
+      --ink: #152238;
+      --muted: #64748b;
+      --page: #f3f6fa;
+      --card: #ffffff;
+      --line: #e5eaf1;
+      --navy: #0b2748;
+      --blue: #2f6fed;
+      --teal: #0d9488;
+      --cyan: #0891b2;
+      --amber: #d97706;
+      --red: #dc4c5b;
+      --violet: #7c5ce4;
+      --green: #2e9b65;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+    .shell { min-height: 100vh; max-width:1920px; margin:0 auto; padding: 12px 18px 10px; }
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 8px;
+    }
+    .title-wrap { display: flex; align-items: center; gap: 13px; }
+    .mark {
+      width: 38px; height: 38px; border-radius: 11px;
+      display: grid; place-items: center;
+      background: linear-gradient(145deg, #163f70, #0b2748);
+      box-shadow: 0 8px 20px rgba(11,39,72,.2);
+    }
+    .mark svg { width: 23px; height: 23px; }
+    h1 { font-size: 21px; line-height: 1.1; margin: 0 0 3px; letter-spacing: -.35px; }
+    .filters { display: flex; align-items: flex-end; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
+    .field label { display: block; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .55px; text-transform: uppercase; margin: 0 0 5px 2px; }
+    select, input {
+      height: 34px; min-width: 122px; border: 1px solid #d8e0ea; border-radius: 8px;
+      padding: 0 11px; background: #fff; color: #26364d; font: 600 12px "Segoe UI", sans-serif;
+      outline: none;
+    }
+    .apply {
+      height: 34px; padding: 0 16px; border: 0; border-radius: 8px; color: #fff;
+      background: var(--navy); font-weight: 750; cursor: pointer;
+      box-shadow: 0 5px 14px rgba(11,39,72,.2);
+    }
+    .kpis { display: grid; grid-template-columns: minmax(365px,2.55fr) minmax(178px,1.35fr) repeat(5,minmax(132px,1fr)); gap: 9px; margin-bottom: 9px; }
+    .kpi {
+      position: relative; overflow: hidden; min-height: 102px; border: 1px solid var(--line);
+      border-radius: 12px; background: var(--card); padding: 11px 12px 9px;
+      box-shadow: 0 4px 16px rgba(28,45,70,.055);
+    }
+    .kpi::after { content:""; position:absolute; right:-14px; bottom:-24px; width:75px; height:75px; border-radius:50%; background: var(--tint); }
+    .k-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .55px; font-weight: 800; }
+    .k-value { margin-top: 7px; font-size: 22px; font-weight: 780; letter-spacing: -.5px; }
+    .k-foot { margin-top: 4px; font-size: 9px; color: #6b7a90; }
+    .added-kpi .k-value { margin-top:6px; }
+    .added-breakdown { position:relative; z-index:1; display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-top:7px; }
+    .added-type { min-width:0; padding-right:5px; border-right:1px solid #e6ebf2; }
+    .added-type:last-child { padding-right:0; border-right:0; }
+    .added-type b { display:block; color:#27425f; font-size:12px; line-height:1; }
+    .added-type span { display:block; margin-top:3px; color:#7a8798; font-size:7px; font-weight:800; text-transform:uppercase; letter-spacing:.25px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .fleet-overview {
+      min-height: 102px; border: 1px solid #cdddf0;
+      border-radius: 12px; background: linear-gradient(135deg,#f7fbff 0%,#edf5ff 100%);
+      padding: 10px 13px; box-shadow: 0 4px 16px rgba(28,45,70,.06);
+    }
+    .overview-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:9px; }
+    .overview-head h2 { margin:0 0 3px; font-size:13px; }
+    .as-of { color:#61738a; font-size:9px; font-weight:750; }
+    .snapshot-badge { padding:4px 7px; border-radius:99px; background:#dceafa; color:#315e8f; font-size:8px; font-weight:850; text-transform:uppercase; letter-spacing:.45px; }
+    .fleet-counts { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    .fleet-stat { border-right:1px solid #d6e3f2; padding-right:7px; min-width:0; }
+    .fleet-stat:last-child { border-right:0; }
+    .fleet-stat .value { display:block; font-size:19px; font-weight:820; line-height:1; color:#172d48; }
+    .fleet-stat .label { display:flex; align-items:center; gap:5px; margin-top:5px; color:#5a6b80; font-size:7px; font-weight:850; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; }
+    .dot { width:7px; height:7px; border-radius:50%; flex:0 0 auto; }
+    .up { color: var(--green); font-weight: 800; }
+    .down { color: var(--red); font-weight: 800; }
+    .dashboard { display:grid; gap:9px; }
+    .dashboard-row { display:grid; gap:9px; min-width:0; }
+    .row-one, .row-two, .row-three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .row-one { min-height:172px; }
+    .row-two { min-height:214px; }
+    .row-three { min-height:278px; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(28,45,70,.055); padding: 10px 12px;
+      min-width: 0; overflow:hidden;
+    }
+    .span2 { grid-column: span 2; }
+    .span3 { grid-column: 1 / -1; }
+    .head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 7px; }
+    .head h2 { margin:0; font-size: 12px; letter-spacing: -.1px; }
+    .head p { margin:2px 0 0; color:var(--muted); font-size:8px; }
+    .heading-line { display:flex; align-items:center; gap:5px; }
+    .info-icon {
+      width:16px; height:16px; flex:0 0 16px; display:inline-grid; place-items:center;
+      padding:0; border:1px solid #b7c5d6; border-radius:50%; background:#f8fbff;
+      color:#47627f; font:700 10px/1 Georgia, serif; cursor:pointer;
+      box-shadow:0 1px 2px rgba(32,55,80,.08); transition:.15s ease;
+    }
+    .info-icon:hover, .info-icon[aria-expanded="true"] { color:#fff; background:#315f91; border-color:#315f91; transform:translateY(-1px); }
+    .info-icon:focus-visible { outline:2px solid #76a7e8; outline-offset:2px; }
+    .card-info-popover {
+      position:fixed; z-index:1000; width:min(570px,calc(100vw - 20px)); max-height:calc(100vh - 20px); overflow-y:auto; padding:17px 19px 18px;
+      border:1px solid #cbd7e5; border-radius:11px; background:#fff;
+      box-shadow:0 16px 40px rgba(21,43,70,.22); color:#2d4058;
+    }
+    .card-info-popover[hidden] { display:none; }
+    .info-popover-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:8px; border-bottom:1px solid #e8edf3; }
+    .info-popover-head strong { color:#17324f; font-size:16px; }
+    .info-close { width:26px; height:26px; border:0; border-radius:6px; background:#eef3f8; color:#607086; cursor:pointer; font-size:19px; line-height:1; }
+    .info-section { margin-top:12px; color:#465970; font-size:12px; line-height:1.5; white-space:pre-line; }
+    .info-section b { display:block; margin-bottom:4px; color:#24405f; font-size:10px; letter-spacing:.45px; text-transform:uppercase; }
+    .info-topic { margin-top:16px; padding:8px 10px; border-radius:7px; background:#eaf3fb; color:#244a72; font-size:13px; font-weight:800; }
+    .info-example { padding:10px 12px; border-radius:8px; background:#f3f7fc; color:#38526e; }
+    .info-note { border-top:1px solid #e8edf3; padding-top:10px; color:#718096; font-size:11px; }
+    .link { color: var(--blue); font-size: 10px; font-weight: 800; white-space: nowrap; cursor:pointer; }
+    .seg { display:flex; background:#f0f3f8; border-radius:8px; padding:3px; gap:2px; }
+    .seg button { border:0; color:#637289; background:transparent; border-radius:6px; padding:5px 7px; font-size:8px; font-weight:800; cursor:pointer; }
+    .seg button.active { color:#174f8f; background:#fff; box-shadow:0 2px 8px rgba(25,45,75,.10); }
+    .row-one .head { margin-bottom:5px; }
+    .trend { height: 116px; width: 100%; display:block; }
+    .axis { fill:#8290a3; font-size:9px; }
+    .gridline { stroke:#e9edf3; stroke-width:1; }
+    .unit-bars { display:grid; gap:8px; margin-top:8px; }
+    .bar-row { display:grid; grid-template-columns:48px 1fr 64px; align-items:center; gap:8px; font-size:10px; }
+    .bar-name { font-weight:750; }
+    .track { height:10px; background:#edf1f6; border-radius:99px; overflow:hidden; }
+    .fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#2f6fed,#64a1ff); }
+    .bar-val { color:#54657b; text-align:right; font-weight:700; }
+    .age-head { position:relative; }
+    .age-total { position:absolute; left:50%; top:0; transform:translateX(-50%); display:flex; align-items:baseline; gap:5px; white-space:nowrap; }
+    .age-total b { font-size:15px; }
+    .age-total span { color:var(--muted); font-size:9px; }
+    .age-row { margin-bottom:6px; }
+    .age-meta { display:flex; justify-content:space-between; margin-bottom:3px; font-size:9px; }
+    .age-meta strong { font-size:11px; }
+    .age-track { height:12px; background:#edf1f6; border-radius:5px; overflow:hidden; }
+    .age-fill { height:100%; border-radius:5px; }
+    .age-note { margin-top:5px; background:#f7f9fc; border-radius:8px; padding:5px 8px; color:#5f6d81; font-size:8px; line-height:1.3; }
+    .rank-wrap { display:grid; grid-template-columns:1fr 1px 1fr; gap:9px; }
+    .divider { background:var(--line); }
+    .rank-title { color:#506078; font-size:9px; font-weight:800; margin-bottom:5px; }
+    .rank-list { display:grid; gap:4px; }
+    .rank { display:grid; grid-template-columns:17px 1fr auto; gap:5px; align-items:center; font-size:8px; }
+    .num { width:16px;height:16px;border-radius:5px;background:#edf3fb;color:#316499;display:grid;place-items:center;font-size:8px;font-weight:850; }
+    .vehicle { font-weight:750; min-width:0; overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .metric { font-weight:800; color:#273b55; }
+    .concentration { margin-top:7px; padding-top:7px; border-top:1px solid var(--line); }
+    .concentration-head { margin-bottom:4px; }
+    .concentration-kicker { display:block; color:#506078; font-size:9px; font-weight:850; text-transform:uppercase; letter-spacing:.45px; }
+    .concentration-scope { display:block; margin-top:3px; color:#7a889a; font-size:8px; line-height:1.35; }
+    .concentration-statement { display:block; margin:5px 0; color:#243b57; font-size:9px; line-height:1.3; }
+    .concentration-groups { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; margin-bottom:3px; color:#53657c; font-size:7px; font-weight:800; line-height:1.2; }
+    .concentration-groups span:last-child { text-align:right; }
+    .concentration-bar { display:flex; width:100%; height:18px; overflow:hidden; border-radius:6px; background:#e9eef5; }
+    .concentration-bar span { display:flex; align-items:center; justify-content:center; min-width:60px; padding:0 5px; color:#fff; font-size:8px; font-weight:850; white-space:nowrap; transition:width .2s ease; }
+    .concentration-top { background:#355f8f; }
+    .concentration-rest { background:#cbd5e1; color:#20364f !important; }
+    .concentration-support { margin-top:5px; padding:5px 7px; border-radius:7px; background:#f4f7fb; color:#40546d; font-size:8px; font-weight:750; line-height:1.25; }
+    .concentration-note { margin-top:4px; color:#7a889a; font-size:7px; line-height:1.25; }
+    .rejection-top { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:2px 0 7px; }
+    .mini { border:1px solid #f0d7d9;background:#fff8f8;border-radius:8px;padding:6px 7px; }
+    .mini .v { font-size:14px;font-weight:800;color:#a93442; }
+    .mini .l { font-size:7px;color:#7c6970;text-transform:uppercase;letter-spacing:.2px;margin-top:3px;font-weight:800; }
+    .rejection-breakdown { display:grid; grid-template-columns:102px 1fr; gap:9px; align-items:center; min-height:104px; }
+    .rejection-donut { position:relative; width:96px; height:96px; border-radius:50%; margin:auto; }
+    .rejection-donut::after { content:""; position:absolute; inset:21px; border-radius:50%; background:#fff; box-shadow:0 0 0 1px rgba(229,234,241,.75); }
+    .donut-center { position:absolute; inset:0; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none; }
+    .donut-center b { color:#263b55; font-size:17px; line-height:1; }
+    .donut-center span { width:56px; margin-top:4px; color:#7b8798; font-size:7px; line-height:1.2; text-transform:uppercase; letter-spacing:.35px; }
+    .rejection-legend { display:grid; gap:5px; min-width:0; }
+    .rejection-legend-row { display:grid; grid-template-columns:9px minmax(0,1fr) auto; gap:6px; align-items:center; font-size:8px; }
+    .legend-dot { width:8px; height:8px; border-radius:50%; }
+    .legend-name { color:#536278; font-weight:720; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .legend-value { color:#263b55; font-weight:820; white-space:nowrap; }
+    .rejection-empty { display:grid; place-items:center; min-height:124px; border:1px dashed #eadde0; border-radius:9px; color:#8b7880; font-size:9px; text-align:center; }
+    .model-bars { display:grid; gap:10px; margin-top:10px; }
+    .model-row { display:grid; grid-template-columns:minmax(118px,1.02fr) minmax(110px,1.7fr) minmax(88px,.72fr); align-items:center; gap:10px; min-height:32px; }
+    .model-label { min-width:0; line-height:1.15; }
+    .model-label strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#2a3f59; font-size:9px; font-weight:820; }
+    .model-label span { display:block; margin-top:3px; color:#8490a1; font-size:7px; font-weight:720; }
+    .model-track { height:20px; background:#edf1f6; border-radius:6px; overflow:hidden; box-shadow:inset 0 0 0 1px rgba(214,222,233,.45); }
+    .model-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,#0d9488,#4cc6b8); }
+    .model-fill.unused { background:linear-gradient(90deg,#d48a16,#efb84c); }
+    .model-stats { min-width:0; text-align:right; line-height:1.15; }
+    .model-stats strong { display:block; color:#29445f; font-size:9px; font-weight:850; white-space:nowrap; }
+    .model-stats span { display:block; margin-top:3px; color:#78869a; font-size:7px; white-space:nowrap; }
+    .model-note { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px; padding:7px 8px; border-radius:7px; background:#f4f7fb; color:#40546d; font-size:8px; line-height:1.3; }
+    .model-note #modelNotePrimary { font-weight:780; }
+    .model-note #modelNoteSecondary { flex:0 0 auto; color:#78869a; font-size:7px; white-space:nowrap; }
+    .support-card { padding-bottom:16px; }
+    .support-flow-legend { display:flex; justify-content:center; gap:16px; margin:1px 0 8px; color:#66768b; font-size:8px; font-weight:780; }
+    .support-flow-legend span { display:inline-flex; align-items:center; gap:5px; }
+    .support-flow-legend i { width:9px; height:6px; border-radius:99px; }
+    .support-flow { display:grid; gap:7px; }
+    .support-flow-row { display:grid; grid-template-columns:56px 1fr; gap:8px; align-items:center; }
+    .support-flow-unit { min-width:0; }
+    .support-flow-unit b { display:block; color:#30445e; font-size:9px; }
+    .support-flow-unit span { display:block; margin-top:2px; color:#78869a; font-size:7px; line-height:1.2; }
+    .support-flow-chart { display:grid; grid-template-columns:27px minmax(38px,1fr) 2px minmax(38px,1fr) 27px; gap:5px; align-items:center; }
+    .support-flow-number { color:#42566f; font-size:8px; font-weight:820; }
+    .support-flow-number.left { text-align:right; }
+    .support-flow-track { height:12px; border-radius:99px; background:#edf1f6; overflow:hidden; }
+    .support-flow-fill { height:100%; border-radius:99px; }
+    .support-flow-fill.borrowed { margin-left:auto; background:linear-gradient(90deg,#f2bd68,#d99025); }
+    .support-flow-fill.supplied { background:linear-gradient(90deg,#5794f4,#2f6fed); }
+    .support-flow-axis { height:20px; border-radius:99px; background:#cbd5e1; }
+    .support-insight { margin-top:7px; padding-top:6px; border-top:1px solid #edf1f5; color:#68788d; font-size:8px; line-height:1.3; }
+    .support-empty { display:grid; place-items:center; min-height:128px; border:1px dashed #dce4ed; border-radius:9px; color:#7a889a; font-size:9px; text-align:center; }
+    .flag-table { width:100%;border-collapse:collapse;margin-top:4px;font-size:9px; }
+    .flag-table th { color:#75849a;text-align:left;padding:6px 5px;border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:.35px;font-size:8px; }
+    .flag-table td { padding:5px 4px;border-bottom:1px solid #f0f3f7;font-weight:650; }
+    .row-one .flag-table th { padding:4px 5px; }
+    .row-one .flag-table td { padding:3px 4px; }
+    .pill { display:inline-block;padding:3px 6px;border-radius:99px;background:#fff1f2;color:#b63d4a;font-size:8px;font-weight:850; }
+    .movement-legend { display:flex; justify-content:center; gap:10px; margin:1px 0 7px; color:#66768b; font-size:7px; font-weight:780; }
+    .movement-legend span { display:inline-flex; align-items:center; gap:4px; }
+    .movement-legend i { width:8px; height:6px; border-radius:2px; }
+    .movement-chart { height:190px; display:flex; align-items:stretch; justify-content:space-around; gap:7px; padding:8px 4px 0; border-left:1px solid #e4eaf1; border-bottom:1px solid #d8e0ea; }
+    .movement-month { flex:1; min-width:0; display:grid; grid-template-rows:1fr 16px; gap:4px; text-align:center; color:#75849a; font-size:8px; }
+    .movement-bars { display:flex; align-items:flex-end; justify-content:center; gap:3px; height:100%; }
+    .movement-bar { position:relative; width:24%; min-width:9px; max-width:18px; border-radius:3px 3px 0 0; }
+    .movement-bar span { position:absolute; left:50%; top:-11px; transform:translateX(-50%); color:#66768b; font-size:6px; font-style:normal; }
+    .movement-bar.added { background:#2f6fed; }
+    .movement-bar.deactivated { background:#dc4c5b; }
+    .movement-summary { margin-top:7px; padding:6px 7px; border-radius:7px; background:#f4f7fb; color:#40546d; font-size:8px; font-weight:750; line-height:1.25; }
+    .movement-empty { display:grid; place-items:center; width:100%; height:100%; color:#7a889a; font-size:8px; text-align:center; }
+    .fleet-card-view { display:flex; flex:1; min-height:210px; flex-direction:column; }
+    .fleet-card-view[hidden] { display:none; }
+    .fleet-location-rows { display:flex; flex:1; min-height:0; flex-direction:column; justify-content:space-evenly; gap:6px; margin-top:6px; }
+    .fleet-location-row { display:grid; grid-template-columns:48px minmax(0,1fr) 94px; align-items:center; gap:8px; color:#40546d; font-size:9px; }
+    .fleet-location-row strong { font-size:9px; }
+    .fleet-location-track { height:14px; border-radius:7px; background:#edf1f6; overflow:hidden; }
+    .fleet-location-fill { height:100%; border-radius:7px; background:linear-gradient(90deg,#2f6fed,#70a8f5); }
+    .fleet-location-value { text-align:right; font-weight:800; white-space:nowrap; }
+    .fleet-location-value small { color:#77879b; font-weight:650; }
+    .fleet-location-empty { display:grid; flex:1; place-items:center; color:#7a889a; font-size:9px; text-align:center; }
+    .fleet-view-tabs { flex:0 0 auto; }
+    .fleet-view-tabs button { font-size:8px; white-space:nowrap; }
+    .fleet-card-view .movement-chart { flex:1; min-height:0; height:180px; }
+    .fleet-card-view .movement-summary { margin-top:5px; }
+    .footer { display:flex;justify-content:space-between;color:#8996a7;font-size:8px;margin-top:6px;padding:0 2px; }
+    @media (min-width:1500px) and (min-height:900px) {
+      .shell { min-height:100vh; }
+    }
+    @media (max-width: 1200px) {
+      .kpis { grid-template-columns:repeat(4,1fr); }
+      .fleet-overview { grid-column:span 4; }
+      .dashboard-row { grid-template-columns:1fr 1fr; min-height:0; }
+      .card { overflow:visible; }
+    }
+    @media (max-width: 720px) {
+      .topbar { flex-direction:column; }
+      .filters { justify-content:flex-start; }
+      .kpis { grid-template-columns:repeat(2,1fr); }
+      .fleet-overview { grid-column:span 2; }
+      .dashboard-row { grid-template-columns:1fr; }
+      .rejection-breakdown { grid-template-columns:104px 1fr; }
+      .rejection-donut { width:100px; height:100px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="title-wrap">
+        <div class="mark">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 15.5V11l2.2-5.1A2 2 0 0 1 7 4.7h9.8a2 2 0 0 1 1.8 1.2L21 11v4.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M5 15.5h14v2.8a1 1 0 0 1-1 1h-1.2a1 1 0 0 1-1-1v-.6H8.2v.6a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-2.8Z" stroke="#fff" stroke-width="1.7"/><circle cx="7.4" cy="13" r="1" fill="#73c7ff"/><circle cx="16.6" cy="13" r="1" fill="#73c7ff"/></svg>
+        </div>
+        <div>
+          <h1>Fleet Performance</h1>
+        </div>
+      </div>
+      <div class="filters">
+        <div class="field"><label>Unit</label><select id="unit"><option>All Units</option><option>Unit A</option><option>Unit B</option><option>Unit C</option><option>Unit D</option></select></div>
+        <div class="field"><label>From</label><input id="fromDate" type="text" value="25-Jun-2026" /></div>
+        <div class="field"><label>To</label><input id="toDate" type="text" value="25-Oct-2026" /></div>
+        <button class="apply" onclick="applyFilters()">Apply</button>
+      </div>
+    </header>
+
+    <section class="kpis">
+      <article class="fleet-overview" aria-label="Fleet overview snapshot">
+        <div class="overview-head"><div><h2>Fleet Overview</h2><div class="as-of" id="overviewDate">As of 25-Oct-2026</div></div><span class="snapshot-badge">Snapshot</span></div>
+        <div class="fleet-counts">
+          <div class="fleet-stat"><span class="value" id="fleetTotal">927</span><span class="label"><i class="dot" style="background:#2f6fed"></i>Total Vehicles</span></div>
+          <div class="fleet-stat"><span class="value" id="fleetAvailable">684</span><span class="label"><i class="dot" style="background:#2e9b65"></i>Available</span></div>
+          <div class="fleet-stat"><span class="value" id="fleetOnMission">173</span><span class="label"><i class="dot" style="background:#d99a28"></i>On Mission</span></div>
+          <div class="fleet-stat"><span class="value" id="fleetUnavailable">70</span><span class="label"><i class="dot" style="background:#d45763"></i>Unavailable</span></div>
+        </div>
+      </article>
+      <div class="kpi added-kpi" style="--tint:#e9f2ff"><div class="k-label">Vehicles Added</div><div class="k-value" id="vehiclesAdded">68</div><div class="added-breakdown"><div class="added-type"><b id="addedSedan">29</b><span>Sedan</span></div><div class="added-type"><b id="addedSuv">24</b><span>SUV</span></div><div class="added-type"><b id="addedPeopleMovers">15</b><span>People Movers</span></div></div><div class="k-foot">Introduced in selected period</div></div>
+      <div class="kpi" style="--tint:#e9fbf7"><div class="k-label">Completed Missions</div><div class="k-value" id="completedMissions">4,862</div><div class="k-foot">Completed within selected period</div></div>
+      <div class="kpi" style="--tint:#e8f8fb"><div class="k-label">Distance Travelled</div><div class="k-value" id="distanceTravelled">1.84M <small style="font-size:11px">km</small></div><div class="k-foot" id="averageDistance">378 km average per mission</div></div>
+      <div class="kpi" style="--tint:#f0ecff"><div class="k-label">Mission Hours</div><div class="k-value" id="missionHours">62.4K <small style="font-size:11px">hrs</small></div><div class="k-foot" id="averageHours">12.8 hours average per mission</div></div>
+      <div class="kpi" style="--tint:#fff2e2"><div class="k-label">Unused Active Fleet</div><div class="k-value" id="unusedFleet">86</div><div class="k-foot"><span class="down" id="unusedRate">9.3%</span> with no completed mission</div></div>
+      <div class="kpi" style="--tint:#ffebed"><div class="k-label">Driver Rejections</div><div class="k-value" id="driverRejections">73</div><div class="k-foot"><span id="affectedRequestFoot">61</span> mission requests affected</div></div>
+    </section>
+
+    <section class="dashboard">
+      <div class="dashboard-row row-one">
+      <article class="card" id="missionActivityCard">
+        <div class="head"><div><div class="heading-line"><h2>Mission Activity Trend</h2><button class="info-icon" aria-label="About Mission Activity Trend" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'mission')">i</button></div><p>Completed missions, kilometres and mission hours by month</p></div><div class="seg"><button class="active" onclick="setTrend(this,'missions')">Missions</button><button onclick="setTrend(this,'km')">KM</button><button onclick="setTrend(this,'hours')">Hours</button></div></div>
+        <svg class="trend" viewBox="0 0 760 174" preserveAspectRatio="none" aria-label="Mission activity trend">
+          <line class="gridline" x1="42" y1="25" x2="740" y2="25"/><line class="gridline" x1="42" y1="65" x2="740" y2="65"/><line class="gridline" x1="42" y1="105" x2="740" y2="105"/><line class="gridline" x1="42" y1="145" x2="740" y2="145"/>
+          <text class="axis" x="6" y="28">1,400</text><text class="axis" x="6" y="68">1,200</text><text class="axis" x="6" y="108">1,000</text><text class="axis" x="17" y="148">800</text>
+          <path d="M55 122 C105 105, 135 108, 185 91 S275 68, 325 83 S415 100, 465 62 S555 58, 605 44 S690 32, 725 38 L725 145 L55 145 Z" fill="#e7f0ff"/>
+          <path id="trendPath" d="M55 122 C105 105, 135 108, 185 91 S275 68, 325 83 S415 100, 465 62 S555 58, 605 44 S690 32, 725 38" fill="none" stroke="#2f6fed" stroke-width="3" stroke-linecap="round"/>
+          <g fill="#2f6fed"><circle cx="55" cy="122" r="4"/><circle cx="185" cy="91" r="4"/><circle cx="325" cy="83" r="4"/><circle cx="465" cy="62" r="4"/><circle cx="605" cy="44" r="4"/><circle cx="725" cy="38" r="4"/></g>
+          <text class="axis" x="42" y="166">Jun*</text><text class="axis" x="173" y="166">Jul</text><text class="axis" x="312" y="166">Aug</text><text class="axis" x="451" y="166">Sep</text><text class="axis" x="591" y="166">Oct*</text>
+        </svg>
+      </article>
+      <article class="card">
+        <div class="head age-head"><div><div class="heading-line"><h2>Fleet Age Profile</h2><button class="info-icon" aria-label="About Fleet Age Profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'age')">i</button></div><p>Active vehicles as of report end date</p></div><div class="age-total"><b id="ageTotal">927</b><span>active vehicles</span></div><span class="link">View vehicles →</span></div>
+        <div class="age-row"><div class="age-meta"><strong>0–&lt;5 years</strong><span id="ageLabel0">486 · 52.4%</span></div><div class="age-track"><div class="age-fill" id="ageBar0" style="width:52.4%;background:#2f6fed"></div></div></div>
+        <div class="age-row"><div class="age-meta"><strong>5–&lt;10 years</strong><span id="ageLabel1">318 · 34.3%</span></div><div class="age-track"><div class="age-fill" id="ageBar1" style="width:34.3%;background:#d99a28"></div></div></div>
+        <div class="age-row"><div class="age-meta"><strong>10+ years</strong><span id="ageLabel2">123 · 13.3%</span></div><div class="age-track"><div class="age-fill" id="ageBar2" style="width:13.3%;background:#d45763"></div></div></div>
+        <div class="age-note">Age bands describe fleet composition; they do not automatically classify a vehicle for replacement.</div>
+      </article>
+      <article class="card">
+        <div class="head"><div><div class="heading-line"><h2>Condition Review Candidates</h2><button class="info-icon" aria-label="About Condition Review Candidates" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'candidates')">i</button></div><p>Old age, high odometer or repeated driver rejection</p></div><span class="link">View all →</span></div>
+        <table class="flag-table">
+          <thead><tr><th>Vehicle</th><th>Unit</th><th>Age</th><th>Odometer</th><th>Rejects</th></tr></thead>
+          <tbody id="candidateRows">
+            <tr><td>A-0712</td><td>Unit A</td><td>13 yr</td><td>348,600 km</td><td><span class="pill">6</span></td></tr>
+            <tr><td>D-2844</td><td>Unit D</td><td>11 yr</td><td>302,180 km</td><td><span class="pill">5</span></td></tr>
+            <tr><td>B-0987</td><td>Unit B</td><td>14 yr</td><td>289,410 km</td><td><span class="pill">4</span></td></tr>
+            <tr><td>C-1903</td><td>Unit C</td><td>10 yr</td><td>271,760 km</td><td><span class="pill">4</span></td></tr>
+          </tbody>
+        </table>
+      </article>
+      </div>
+
+      <div class="dashboard-row row-two">
+      <article class="card">
+        <div class="head"><div><div class="heading-line"><h2 id="unitUtilizationTitle">Unit Utilization</h2><button class="info-icon" aria-label="About Unit or Make Utilization" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'unit')">i</button></div><p id="unitUtilizationSubtitle">Completed-mission kilometres per average active vehicle</p></div><div class="seg"><button class="active" onclick="setUnitMetric(this,'km')">KM</button><button onclick="setUnitMetric(this,'missions')">Missions</button><button onclick="setUnitMetric(this,'hours')">Hours</button></div></div>
+        <div class="unit-bars" id="unitBars"></div>
+        <div class="age-note" id="unitInsight" style="margin-top:18px"><strong style="color:#294864">Management signal:</strong> Unit D has the lowest average utilization and the highest unused-fleet share.</div>
+      </article>
+
+      <article class="card support-card">
+        <div class="head"><div><div class="heading-line"><h2>Inter-Unit Vehicle Support</h2><button class="info-icon" aria-label="About Inter-Unit Vehicle Support" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'support')">i</button></div></div></div>
+        <div class="support-flow-legend"><span><i style="background:#d99025"></i>Borrowed missions</span><span><i style="background:#2f6fed"></i>Supplied missions</span></div>
+        <div id="supportFlow" class="support-flow" role="img" aria-label="Inter-unit vehicle support by completed mission count"></div>
+        <div id="supportInsight" class="support-insight"></div>
+      </article>
+
+      <article class="card">
+        <div class="head"><div><div class="heading-line"><h2>Driver-Rejection Signals</h2><button class="info-icon" aria-label="About Driver-Rejection Signals" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'rejection')">i</button></div><p>Separate from completed-mission utilization</p></div><span class="link">Review history →</span></div>
+        <div class="rejection-top">
+          <div class="mini"><div class="v" id="rejectionEvents">73</div><div class="l">Events</div></div>
+          <div class="mini"><div class="v" id="rejectedVehicles">48</div><div class="l">Vehicles</div></div>
+          <div class="mini" title="Distinct mission request numbers with at least one driver rejection"><div class="v" id="affectedMissions">61</div><div class="l">Missions</div></div>
+        </div>
+        <div id="rejectionReasons"></div>
+      </article>
+      </div>
+
+      <div class="dashboard-row row-three">
+      <article class="card">
+        <div class="head"><div><div class="heading-line"><h2 id="modelUtilizationTitle">Fleet Activity by Vehicle Model</h2><button class="info-icon" aria-label="About Fleet Activity by Vehicle Model" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'model')">i</button></div><p id="modelUtilizationSubtitle">Total completed-mission kilometres during the selected period</p></div><div class="seg"><button class="active" onclick="setModelMetric(this,'km')">KM</button><button onclick="setModelMetric(this,'missions')">Missions</button><button onclick="setModelMetric(this,'hours')">Hours</button><button onclick="setModelMetric(this,'unused')">Unused</button></div></div>
+        <div class="model-bars" id="modelUtilizationBars" aria-label="Fleet activity by vehicle model"></div>
+        <div class="model-note"><span id="modelNotePrimary">Top five models for the selected unit and reporting period</span><span id="modelNoteSecondary">Hover for vehicle count and average</span></div>
+      </article>
+
+      <article class="card">
+        <div class="head"><div><div class="heading-line"><h2>Vehicle Utilization Ranking</h2><button class="info-icon" aria-label="About Vehicle Utilization Ranking" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'ranking')">i</button></div><p>Only completed missions in the selected period</p></div><div class="seg"><button class="active" onclick="setRank(this,'hours')">Hours</button><button onclick="setRank(this,'km')">KM</button><button onclick="setRank(this,'missions')">Missions</button></div></div>
+        <div class="rank-wrap">
+          <div><div class="rank-title">Most Utilized</div><div class="rank-list" id="mostList">
+            <div class="rank"><span class="num">1</span><span class="vehicle">A-1048 · Toyota</span><span class="metric">614 h</span></div>
+            <div class="rank"><span class="num">2</span><span class="vehicle">C-2207 · Nissan</span><span class="metric">586 h</span></div>
+            <div class="rank"><span class="num">3</span><span class="vehicle">B-1182 · Ford</span><span class="metric">559 h</span></div>
+            <div class="rank"><span class="num">4</span><span class="vehicle">A-0936 · Hyundai</span><span class="metric">542 h</span></div>
+            <div class="rank"><span class="num">5</span><span class="vehicle">D-3104 · Isuzu</span><span class="metric">519 h</span></div>
+          </div></div>
+          <div class="divider"></div>
+          <div><div class="rank-title">Least Utilized</div><div class="rank-list" id="leastList">
+            <div class="rank"><span class="num">1</span><span class="vehicle">D-3021 · Honda</span><span class="metric">0 h</span></div>
+            <div class="rank"><span class="num">2</span><span class="vehicle">B-1260 · MG</span><span class="metric">0 h</span></div>
+            <div class="rank"><span class="num">3</span><span class="vehicle">C-2418 · Kia</span><span class="metric">4 h</span></div>
+            <div class="rank"><span class="num">4</span><span class="vehicle">D-3188 · Toyota</span><span class="metric">7 h</span></div>
+            <div class="rank"><span class="num">5</span><span class="vehicle">A-0881 · Nissan</span><span class="metric">9 h</span></div>
+          </div></div>
+        </div>
+        <div class="concentration" aria-label="Fleet usage distribution">
+          <div class="concentration-head"><span class="concentration-kicker">Fleet Usage Distribution</span><span class="concentration-scope" id="concentrationScope">Based on 927 vehicles active during the selected period</span></div>
+          <strong class="concentration-statement" id="concentrationStatement">The highest-used 20% — 186 vehicles — generated 64% of all mission hours.</strong>
+          <div class="concentration-groups"><span id="highestUsedLabel">Highest-used 20% · 186 vehicles</span><span id="otherVehiclesLabel">Other 80% · 741 vehicles</span></div>
+          <div class="concentration-bar" id="concentrationBar" role="img" aria-label="Highest-used 20%, 186 vehicles, generated 64% of all mission hours; other 80%, 741 vehicles, generated 36%.">
+            <span class="concentration-top" id="concentrationTop" style="width:64%">64%</span><span class="concentration-rest" id="concentrationRest" style="width:36%">36%</span>
+          </div>
+          <div class="concentration-support" id="top10Insight">Highest-used 10%: 93 vehicles generated 41% of all mission hours.</div>
+          <div class="concentration-note">Includes vehicles active at any time in the period, including vehicles with zero completed missions.</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="head"><div><div class="heading-line"><h2>Fleet Location &amp; Movement</h2><button class="info-icon" aria-label="About Fleet Location and Fleet Movement" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'locationMovement')">i</button></div><p id="fleetViewSubtitle">Active vehicles by owning unit as of report end date</p></div><div class="seg fleet-view-tabs" role="tablist" aria-label="Fleet chart view"><button id="locationTab" class="active" role="tab" aria-selected="true" aria-controls="fleetLocationView" onclick="setFleetView('location')">Fleet Location</button><button id="movementTab" role="tab" aria-selected="false" aria-controls="fleetMovementView" onclick="setFleetView('movement')">Fleet Movement</button></div></div>
+        <div id="fleetLocationView" class="fleet-card-view" role="tabpanel" aria-labelledby="locationTab">
+          <div id="fleetLocationRows" class="fleet-location-rows" role="img" aria-label="Fleet count by owning unit"></div>
+          <div id="fleetLocationSummary" class="movement-summary"></div>
+        </div>
+        <div id="fleetMovementView" class="fleet-card-view" role="tabpanel" aria-labelledby="movementTab" hidden>
+          <div class="movement-legend"><span><i style="background:#2f6fed"></i>Added</span><span><i style="background:#dc4c5b"></i>Deactivated</span></div>
+          <div id="fleetMovementChart" class="movement-chart" role="img" aria-label="Fleet movement by month"></div>
+          <div id="fleetMovementSummary" class="movement-summary">Selected period: 68 added · 36 deactivated</div>
+        </div>
+      </article>
+      </div>
+    </section>
+
+    <div class="footer"><span>* Partial month</span><span>Last refreshed: 25-Oct-2026 08:00</span></div>
+  </main>
+  <aside id="cardInfoPopover" class="card-info-popover" role="dialog" aria-modal="false" aria-labelledby="cardInfoTitle" hidden></aside>
+  <script>
+    const cardInfoData={
+      mission:{title:'Mission Activity Trend',shows:'Shows how completed mission activity changes month by month. The Missions, KM and Hours buttons represent three different measures of demand.',included:'Count a mission in the month of its end date, when its status is Completed. Use the selected requesting unit and calendar range. A mission crossing two months belongs wholly to the completion month; rejected assignments are excluded.',calculation:'Missions = number of completed request/mission records.\nKM = sum of recorded mission distances.\nHours for each mission = end date/time − start date/time, converted to hours; monthly hours = sum of those durations.',example:'If two missions end in July, one travels 120 km from 08:00–12:00 and the other 80 km from 09:00–14:00, July shows 2 missions, 200 km and 9 mission hours. Full duration includes waiting time.',decision:'Shows rising or falling demand and helps management plan capacity by month.',note:'The line shapes in this concept HTML are fixed illustrations; the headline totals respond to the filters. A live implementation should calculate each plotted month from mission records.'},
+      age:{title:'Fleet Age Profile',shows:'Shows how many active vehicles fall in each registration-age band: 0–<5, 5–<10 and 10+ years.',included:'Use the vehicle registration date and activation/deactivation history to determine vehicles active as of the report end date. A vehicle belongs to exactly one age band. The selected unit refers to vehicle ownership.',calculation:'Age = full years elapsed from registration date to the report end date. Count vehicles per band.\nBand percentage = band vehicle count ÷ all active vehicles × 100. The three band counts should add to the active-fleet total.',example:'If 486 of 927 active vehicles are under 5 years old, the share is 486 ÷ 927 × 100 = 52.4%. The remaining 318 aged 5–<10 and 123 aged 10+ complete the 927.',decision:'Highlights future renewal pressure. Older age alone does not mean a vehicle must be replaced.',note:'The concept HTML uses predefined age-band counts per unit; the production calculation requires registration and activation history.'},
+      candidates:{title:'Condition Review Candidates',shows:'Lists vehicles that may need a closer condition review, with age, latest odometer reading and driver-rejection count together.',included:'Use the selected owning unit. Read the latest odometer from vehicle master, calculate age at the report end date, and count historical driver rejections whose rejection date falls in the selected range. Show the vehicle number so the underlying records can be reviewed.',calculation:'Age = completed years since registration.\nRejections = count of rejection events for that vehicle in the range; repeated events on the same vehicle count separately. Odometer is a current reading, not the sum of mission kilometres. No weighted score or replacement threshold has been approved.',example:'Vehicle A-0712 is 13 years old, shows 348,600 km on its odometer and has 6 rejection events. Those three facts prompt a review; they do not automatically mean replace it.',decision:'Helps prioritize physical inspection and investigate repeated concerns before a repair or renewal decision.',note:'Candidate rows are illustrative in this HTML. Selection thresholds and ownership of review decisions would need management approval.'},
+      unit:{title:'Unit / Make Utilization',shows:'Compares usage per active vehicle. All Units compares units; choosing one unit changes the bars to vehicle makes within that unit. KM, Missions and Hours switch the measure.',included:'Use Completed missions ending in the selected calendar range. Attribute unit-level work to the requesting unit; when comparing makes, group missions by the assigned vehicle’s make. Count active vehicles in the relevant group, including vehicles with no missions.',calculation:'For each unit or make, add completed-mission KM, count missions, or add mission duration hours. Divide that total by the average active-vehicle count over the period.\nAverage active count = sum of daily active-vehicle counts ÷ number of calendar days. This avoids inflating utilization when fleet size changes.',example:'If Unit A travels 521,000 km and averages 230.5 active vehicles, 521,000 ÷ 230.5 ≈ 2,260 km per vehicle. If 1,365 missions use that fleet, 1,365 ÷ 230.5 ≈ 5.9 missions per vehicle.',decision:'Identifies groups with relatively low use and supports reallocating capacity. Compare mission type and vehicle suitability before acting.',note:'The concept bars use predefined values scaled for date changes, rather than individual daily fleet and mission records.'},
+      support:{title:'Inter-Unit Vehicle Support',shows:'Shows completed missions fulfilled by a vehicle owned by a different unit from the unit that requested the mission.',included:'Compare the mission requesting unit with the assigned vehicle’s owning unit. Count only Completed missions ending in the selected range. A mission is counted once as borrowed for the requester and once as supplied for the owner; the fleet-wide cross-unit mission total counts it once.',calculation:'Borrowed by a unit = completed missions it requested using another unit’s vehicle.\nSupplied by a unit = completed missions other units requested using its vehicles.\nNet support = supplied missions − borrowed missions. A negative net means the unit borrowed more than it supplied.\nCross-unit share = cross-unit missions ÷ all completed missions × 100.',example:'Unit A borrowed 190 missions and supplied 84: 84 − 190 = −106 net. Across all units, 427 of 4,862 completed missions crossed units: 427 ÷ 4,862 × 100 = 8.8%. Unit B → Unit A accounts for 130.',decision:'Reveals dependence on other units and helps decide whether fleet allocation by unit needs adjustment.',note:'The bars show mission counts; one cross-unit mission is not two fleet-wide missions.'},
+      rejection:{title:'Driver-Rejection Signals',shows:'Summarizes vehicle offers rejected by drivers: rejection events, distinct vehicles, distinct mission requests affected, and the five most frequent recorded conditions plus Others.',included:'Use rejection timestamp, vehicle number, request number and recorded reasons from rejection history. Apply the selected unit and date range to rejection events. A request can have several rejected vehicle offers; a vehicle can be rejected more than once; one event can list several conditions.',calculation:'Events = count of rejection records dated within the selected range. Vehicles = number of distinct vehicle numbers on those records.\nMissions = number of distinct request numbers on those records, even if a request was later completed or never completed. Multiple rejected offers on one request count as one affected request.\nDonut condition share = occurrences of one reason ÷ all recorded reason occurrences × 100. Sort reasons by occurrence, display the five most frequent and combine the rest as Others. No assignment-attempt rate is shown.',example:'Suppose the selected range has 73 rejection records covering 48 different vehicles and 61 different request numbers. Those are three different counts, not a percentage. If Tyres / wheels occurs 22 times among 83 recorded conditions, its donut share is 22 ÷ 83 × 100 = 26.5%.',decision:'Highlights recurring condition problems and how widely rejection events affect vehicles and mission requests.',note:'The 61 affected requests is illustrative. In production, count distinct request numbers in the timestamped rejection history. Donut percentages refer to reasons, not vehicle offers or mission requests.'},
+      model:{title:'Fleet Activity by Vehicle Model',shows:'Compares the selected completed-mission total by vehicle model. The Unused button switches to active vehicles with no completed mission in the range.',included:'Group assigned vehicles by model within the selected owning unit. For KM, Missions and Hours include only Completed missions ending in the selected period. Include active vehicles without missions in the vehicle denominator. The chart displays the leading models for the selected measure.',calculation:'Model KM = sum of mission distance; Missions = completed-mission count; Hours = sum of end − start duration.\nAverage per vehicle = model total ÷ active vehicles of that model.\nContribution = model total ÷ sum of totals for models shown × 100.\nUnused rate = active vehicles of the model with zero completed missions ÷ active vehicles of the model × 100.',example:'For 146 Toyota Land Cruisers with 359,160 km, average = 359,160 ÷ 146 = 2,460 km per vehicle. If a model has 5 unused vehicles out of 19 active, unused rate = 5 ÷ 19 × 100 = 26.3%.',decision:'Shows which models bear the workload and which sit idle, supporting model mix and deployment decisions.',note:'A contribution percentage relates only to the displayed models; it is not necessarily the model’s share of the whole fleet.'},
+      ranking:{title:'Vehicle Utilization Ranking',shows:'The two lists name the five highest-used and five lowest-used individual vehicles. Fleet Usage Distribution below them shows what percentage of all activity came from the highest-used 20% of eligible vehicles versus the other 80%. It also calls out the highest-used 10%.',included:'Include vehicles active at any time in the selected period, including zero-use vehicles. Aggregate only Completed missions whose end date is in range. The Hours, KM and Missions buttons change both the lists and the Fleet Usage Distribution. Rank by the selected measure; a vehicle may rank differently for hours, KM and missions.',calculation:'First calculate each vehicle’s total hours, KM or completed missions, then sort from highest to lowest.\nEligible count = vehicles active at any time in the range. Highest-used 20% count = round up eligible count × 0.20; highest-used 10% count = round up eligible count × 0.10.\nTop 20% contribution = sum of the top group’s selected metric ÷ sum of the metric for every eligible vehicle × 100. Other 80% contribution = 100% − top 20% contribution. Calculate the top 10% contribution in the same way. Zero-use vehicles remain in the denominator of vehicle counts.',example:'For 927 eligible vehicles, round up 927 × 20% = 186; the other 741 are the remaining 80%. If all vehicles generated 62,400 mission hours and the top 186 generated 39,936 hours, their contribution is 39,936 ÷ 62,400 × 100 = 64%; the other 741 generated 22,464 hours, or 36%. The top 93 vehicles (10%) generated 25,584 hours, or 41%.',decision:'Shows whether workload is concentrated on a small set of vehicles. A high top-20% share may prompt management to review overuse, idle assets, vehicle suitability and allocation between units.',note:'The percentages describe share of activity, not the percentage of vehicles used. The ranking and concentration values are illustrative mock data.'},
+      locationMovement:{
+        title:'Fleet Location & Movement',
+        sections:[
+          {heading:'Fleet Location',shows:'Shows the number and share of active vehicles owned by Unit A, B, C and D. Owning unit is the home-base grouping, not a live physical position.',included:'Use the selected To date as the snapshot date. From does not affect this view. A vehicle counts if it was introduced on or before To and was not deactivated by the end of To. Ownership does not change in this mockup. The Unit filter limits the displayed bars, while each percentage remains a share of the whole fleet.',calculation:'Unit count = active vehicles owned by that unit as of To.\nAll-unit total = sum of the four unit counts.\nUnit share = unit count ÷ all-unit total × 100.\nFor an earlier To date, reverse later changes: earlier count = 25-Oct count − vehicles added after To + vehicles deactivated after To.',example:'On 25-Oct, Unit A has 260 of 927 active vehicles: 260 ÷ 927 × 100 = 28.0%. If To changes to 30-Sep, the mock data has 16 additions and 10 deactivations in October. The earlier total is 927 − 16 + 10 = 921 vehicles.',decision:'Shows how the owned fleet is distributed between units. It does not indicate where a borrowed vehicle is physically parked.'},
+          {heading:'Fleet Movement',shows:'Shows monthly vehicles Added and Deactivated as two separate bars. It is an event trend, not a location snapshot.',included:'Use first introduction dates and deactivation dates between From and To, inclusive. Apply the selected owning-unit filter. There is no reactivation category.',calculation:'Monthly Added = distinct vehicles first introduced during that month.\nMonthly Deactivated = distinct vehicles deactivated during that month.\nPeriod totals = sum of the monthly Added values and, separately, sum of the monthly Deactivated values. Do not add both totals together as a fleet count.',example:'August has 18 additions and 9 deactivations, a net increase of 9. Across 25-Jun to 25-Oct, the dated mock records total 68 added and 36 deactivated, a net increase of 32. The location snapshot still needs a starting fleet count: 895 + 32 = 927 at 25-Oct.',decision:'Shows when vehicles entered or left active service and helps plan replacement capacity.'}
+        ],
+        note:'These are illustrative vehicle counts and dated events. The sample history supports snapshots from 25-Jun through 25-Oct-2026; outside that period the location view shows no historical snapshot. The other dashboard cards retain their existing illustrative calculations.'
+      }
+    };
+    function getCardInfo(key){return cardInfoData[key]||null;}
+    function closeCardInfo(){
+      const popover=document.getElementById('cardInfoPopover');
+      if(!popover)return;
+      popover.hidden=true; popover.dataset.key='';
+      document.querySelectorAll('.info-icon[aria-expanded="true"]').forEach(button=>button.setAttribute('aria-expanded','false'));
+    }
+    function showCardInfo(event,key){
+      event.stopPropagation();
+      const button=event.currentTarget,popover=document.getElementById('cardInfoPopover'),info=getCardInfo(key);
+      if(!popover||!info)return;
+      if(!popover.hidden&&popover.dataset.key===key){closeCardInfo();return;}
+      closeCardInfo();
+      const head=`<div class="info-popover-head"><strong id="cardInfoTitle">${info.title}</strong><button class="info-close" aria-label="Close information" onclick="closeCardInfo()">×</button></div>`;
+      const details=info.sections
+        ? info.sections.map(section=>`<div class="info-topic">${section.heading}</div><div class="info-section"><b>What this view shows</b>${section.shows}</div><div class="info-section"><b>Which records are included</b>${section.included}</div><div class="info-section"><b>How it is calculated</b>${section.calculation}</div><div class="info-section info-example"><b>Worked numeric example</b>${section.example}</div><div class="info-section"><b>Why management may use it</b>${section.decision}</div>`).join('')
+        : `<div class="info-section"><b>What this graph shows</b>${info.shows}</div><div class="info-section"><b>Which records are included</b>${info.included}</div><div class="info-section"><b>How it is calculated</b>${info.calculation}</div><div class="info-section info-example"><b>Worked numeric example</b>${info.example}</div><div class="info-section"><b>Why management may use it</b>${info.decision}</div>`;
+      popover.innerHTML=head+details+`<div class="info-section info-note"><b>About this mockup</b>${info.note}</div>`;
+      popover.hidden=false; popover.dataset.key=key; button.setAttribute('aria-expanded','true');
+      const rect=button.getBoundingClientRect(),panelWidth=popover.offsetWidth,panelHeight=popover.offsetHeight;
+      const left=Math.min(window.innerWidth-panelWidth-10,Math.max(10,rect.left-18));
+      let top=rect.bottom+8;
+      if(top+panelHeight>window.innerHeight-10)top=Math.max(10,rect.top-panelHeight-8);
+      popover.style.left=left+'px'; popover.style.top=top+'px';
+    }
+    if(typeof document!=='undefined'&&document.addEventListener){
+      document.addEventListener('click',event=>{if(!event.target.closest('.card-info-popover')&&!event.target.closest('.info-icon'))closeCardInfo();});
+      document.addEventListener('keydown',event=>{if(event.key==='Escape')closeCardInfo();});
+    }
+    if(typeof window!=='undefined')window.addEventListener('resize',closeCardInfo);
+    const dashboardData={
+      "All Units":{fleet:[927,684,173,70],missions:4862,km:1840000,hours:62400,unused:86,rejections:73,rejectedVehicles:48,affectedMissions:61,age:[486,318,123],reasons:[22,16,12,23]},
+      "Unit A":{fleet:[260,190,52,18],missions:1365,km:521000,hours:17600,unused:18,rejections:16,rejectedVehicles:12,affectedMissions:14,age:[140,87,33],reasons:[5,4,3,4]},
+      "Unit B":{fleet:[232,171,43,18],missions:1218,km:460000,hours:15600,unused:20,rejections:17,rejectedVehicles:11,affectedMissions:15,age:[122,80,30],reasons:[5,3,3,6]},
+      "Unit C":{fleet:[223,166,40,17],missions:1167,km:447000,hours:14900,unused:22,rejections:18,rejectedVehicles:12,affectedMissions:16,age:[116,76,31],reasons:[5,4,3,6]},
+      "Unit D":{fleet:[212,157,38,17],missions:1112,km:412000,hours:14300,unused:26,rejections:22,rejectedVehicles:13,affectedMissions:16,age:[108,75,29],reasons:[7,5,3,7]}
+    };
+    const rejectionConditionData={
+      "All Units":[
+        {name:'Tyres / wheels',count:22},{name:'Warning light',count:16},{name:'Exterior damage',count:12},{name:'Brake concern',count:10},
+        {name:'Fluid leak',count:8},{name:'Unusual noise',count:7},{name:'Lighting fault',count:4},{name:'Interior safety',count:4}
+      ],
+      "Unit A":[
+        {name:'Tyres / wheels',count:5},{name:'Warning light',count:4},{name:'Exterior damage',count:3},{name:'Brake concern',count:2},
+        {name:'Fluid leak',count:2},{name:'Unusual noise',count:1},{name:'Lighting fault',count:1},{name:'Interior safety',count:1}
+      ],
+      "Unit B":[
+        {name:'Tyres / wheels',count:5},{name:'Warning light',count:4},{name:'Exterior damage',count:3},{name:'Brake concern',count:3},
+        {name:'Fluid leak',count:2},{name:'Unusual noise',count:2},{name:'Lighting fault',count:1},{name:'Interior safety',count:1}
+      ],
+      "Unit C":[
+        {name:'Tyres / wheels',count:5},{name:'Warning light',count:4},{name:'Exterior damage',count:3},{name:'Brake concern',count:2},
+        {name:'Fluid leak',count:2},{name:'Unusual noise',count:2},{name:'Lighting fault',count:1},{name:'Interior safety',count:1}
+      ],
+      "Unit D":[
+        {name:'Tyres / wheels',count:7},{name:'Warning light',count:4},{name:'Exterior damage',count:3},{name:'Brake concern',count:3},
+        {name:'Fluid leak',count:2},{name:'Unusual noise',count:2},{name:'Lighting fault',count:1},{name:'Interior safety',count:1}
+      ]
+    };
+    const utilizationData={
+      "All Units":{km:[["Unit A",2260],["Unit B",2021],["Unit C",1846],["Unit D",1631]],missions:[["Unit A",5.46],["Unit B",5.25],["Unit C",5.13],["Unit D",5.01]],hours:[["Unit A",70.4],["Unit B",67.2],["Unit C",65.8],["Unit D",63.9]]},
+      "Unit A":{km:[["Toyota",2450],["Nissan",2320],["Hyundai",2210],["Ford",2095]],missions:[["Toyota",5.9],["Nissan",5.6],["Hyundai",5.3],["Ford",5.1]],hours:[["Toyota",74.2],["Nissan",71.8],["Hyundai",68.9],["Ford",66.4]]},
+      "Unit B":{km:[["Nissan",2190],["Toyota",2080],["Kia",1970],["MG",1845]],missions:[["Nissan",5.7],["Toyota",5.4],["Kia",5.1],["MG",4.8]],hours:[["Nissan",70.1],["Toyota",68.3],["Kia",65.7],["MG",62.6]]},
+      "Unit C":{km:[["Toyota",2035],["Mitsubishi",1940],["Honda",1810],["Hyundai",1685]],missions:[["Toyota",5.6],["Mitsubishi",5.3],["Honda",4.9],["Hyundai",4.6]],hours:[["Toyota",68.8],["Mitsubishi",66.9],["Honda",63.2],["Hyundai",60.5]]},
+      "Unit D":{km:[["Isuzu",1880],["Toyota",1715],["Ford",1570],["Nissan",1420]],missions:[["Isuzu",5.5],["Toyota",5.1],["Ford",4.7],["Nissan",4.3]],hours:[["Isuzu",67.1],["Toyota",64.4],["Ford",61.2],["Nissan",58.8]]}
+    };
+    const rankingVehicles={
+      "All Units":["A-1048 · Toyota","C-2207 · Nissan","B-1182 · Ford","A-0936 · Hyundai","D-3104 · Isuzu","D-3021 · Honda","B-1260 · MG","C-2418 · Kia","D-3188 · Toyota","A-0881 · Nissan"],
+      "Unit A":["A-1048 · Toyota","A-0936 · Hyundai","A-1165 · Nissan","A-1208 · Ford","A-1011 · Toyota","A-0881 · Nissan","A-1250 · MG","A-1077 · Kia","A-1194 · Honda","A-0972 · Toyota"],
+      "Unit B":["B-1182 · Ford","B-1420 · Nissan","B-1378 · Toyota","B-1095 · Kia","B-1311 · MG","B-1260 · MG","B-1442 · Honda","B-1039 · Toyota","B-1227 · Nissan","B-1158 · Ford"],
+      "Unit C":["C-2207 · Nissan","C-2349 · Toyota","C-2091 · Mitsubishi","C-2510 · Honda","C-2268 · Hyundai","C-2418 · Kia","C-2155 · Toyota","C-2477 · Nissan","C-2301 · Honda","C-2186 · Mitsubishi"],
+      "Unit D":["D-3104 · Isuzu","D-2941 · Toyota","D-3260 · Ford","D-2817 · Nissan","D-3055 · Isuzu","D-3021 · Honda","D-3188 · Toyota","D-2894 · Nissan","D-3212 · Ford","D-2768 · Isuzu"]
+    };
+    const rankingMetricData={
+      hours:{most:[614,586,559,542,519],least:[0,0,4,7,9]},
+      km:{most:[18640,17980,17320,16880,16120],least:[0,0,118,204,267]},
+      missions:{most:[42,39,38,36,35],least:[0,0,1,1,2]}
+    };
+    const concentrationData={
+      "All Units":{eligible:927,hours:[41,64],km:[39,62],missions:[36,58]},
+      "Unit A":{eligible:260,hours:[39,61],km:[37,59],missions:[35,56]},
+      "Unit B":{eligible:232,hours:[42,65],km:[40,63],missions:[37,59]},
+      "Unit C":{eligible:223,hours:[40,63],km:[38,61],missions:[36,57]},
+      "Unit D":{eligible:212,hours:[45,68],km:[43,66],missions:[39,62]}
+    };
+    const candidateData={
+      "All Units":[["A-0712","Unit A","13 yr","348,600 km",6],["D-2844","Unit D","11 yr","302,180 km",5],["B-0987","Unit B","14 yr","289,410 km",4],["C-1903","Unit C","10 yr","271,760 km",4]],
+      "Unit A":[["A-0712","Unit A","13 yr","348,600 km",6],["A-0648","Unit A","12 yr","316,440 km",4],["A-0831","Unit A","10 yr","267,900 km",3]],
+      "Unit B":[["B-0987","Unit B","14 yr","289,410 km",4],["B-0744","Unit B","12 yr","278,620 km",3],["B-1021","Unit B","10 yr","251,870 km",3]],
+      "Unit C":[["C-1903","Unit C","10 yr","271,760 km",4],["C-1662","Unit C","12 yr","264,330 km",3],["C-1818","Unit C","11 yr","249,600 km",3]],
+      "Unit D":[["D-2844","Unit D","11 yr","302,180 km",5],["D-2671","Unit D","13 yr","291,740 km",4],["D-2768","Unit D","10 yr","258,930 km",3]]
+    };
+    const modelData={
+      "All Units":[
+        {name:"Toyota Land Cruiser",vehicles:146,km:2460,missions:6.2,hours:76.5,unused:12},
+        {name:"Nissan Patrol",vehicles:128,km:2320,missions:5.9,hours:72.8,unused:20},
+        {name:"Mitsubishi Pajero",vehicles:110,km:2200,missions:5.6,hours:69.2,unused:14},
+        {name:"Toyota Camry",vehicles:102,km:2070,missions:5.3,hours:65.4,unused:19},
+        {name:"Ford Everest",vehicles:84,km:1950,missions:5.0,hours:62.1,unused:13}
+      ],
+      "Unit A":[
+        {name:"Toyota Land Cruiser",vehicles:42,km:2580,missions:6.5,hours:79.4,unused:2},
+        {name:"Nissan Patrol",vehicles:37,km:2410,missions:6.1,hours:75.6,unused:3},
+        {name:"Toyota Camry",vehicles:31,km:2290,missions:5.8,hours:71.8,unused:4},
+        {name:"Ford Everest",vehicles:24,km:2140,missions:5.4,hours:67.7,unused:3},
+        {name:"Hyundai Sonata",vehicles:22,km:1980,missions:5.1,hours:63.9,unused:4}
+      ],
+      "Unit B":[
+        {name:"Nissan Patrol",vehicles:35,km:2380,missions:6.0,hours:74.1,unused:4},
+        {name:"Toyota Land Cruiser",vehicles:33,km:2260,missions:5.7,hours:70.8,unused:3},
+        {name:"Kia Sportage",vehicles:29,km:2110,missions:5.4,hours:67.0,unused:5},
+        {name:"Toyota Camry",vehicles:27,km:1990,missions:5.1,hours:63.7,unused:3},
+        {name:"MG RX8",vehicles:19,km:1840,missions:4.7,hours:59.3,unused:5}
+      ],
+      "Unit C":[
+        {name:"Mitsubishi Pajero",vehicles:34,km:2290,missions:5.9,hours:72.6,unused:4},
+        {name:"Toyota Land Cruiser",vehicles:31,km:2170,missions:5.6,hours:69.1,unused:3},
+        {name:"Honda Accord",vehicles:26,km:2030,missions:5.2,hours:65.0,unused:5},
+        {name:"Nissan Patrol",vehicles:25,km:1920,missions:4.9,hours:61.8,unused:4},
+        {name:"Hyundai Sonata",vehicles:21,km:1780,missions:4.6,hours:58.2,unused:5}
+      ],
+      "Unit D":[
+        {name:"Isuzu MU-X",vehicles:32,km:2100,missions:5.7,hours:69.8,unused:4},
+        {name:"Toyota Land Cruiser",vehicles:28,km:1940,missions:5.3,hours:65.9,unused:5},
+        {name:"Ford Everest",vehicles:25,km:1810,missions:4.9,hours:62.0,unused:5},
+        {name:"Nissan Patrol",vehicles:23,km:1660,missions:4.6,hours:58.4,unused:6},
+        {name:"Mitsubishi Pajero",vehicles:20,km:1510,missions:4.2,hours:54.7,unused:5}
+      ]
+    };
+    const supportUnits=['Unit A','Unit B','Unit C','Unit D'];
+    const interUnitData={
+      missions:[[1175,130,38,22],[28,1176,10,4],[36,31,1082,18],[20,58,32,1002]],
+      km:[[440000,52000,18000,11000],[12000,440000,5000,3000],[15000,12000,412000,8000],[8000,22000,12000,370000]],
+      hours:[[14700,1800,700,400],[500,14900,150,50],[550,450,13600,300],[300,900,400,12700]]
+    };
+    const supportDateBuckets=[
+      {from:'25-Jun-2026',to:'30-Jun-2026',share:.04},
+      {from:'01-Jul-2026',to:'31-Jul-2026',share:.21},
+      {from:'01-Aug-2026',to:'31-Aug-2026',share:.23},
+      {from:'01-Sep-2026',to:'30-Sep-2026',share:.25},
+      {from:'01-Oct-2026',to:'25-Oct-2026',share:.27}
+    ];
+    const fleetLifecycleData=[
+      {date:'27-Jun-2026',units:{
+        'Unit A':{added:[1,0,0],deactivated:1},'Unit B':{added:[0,1,0],deactivated:0},
+        'Unit C':{added:[0,1,0],deactivated:1},'Unit D':{added:[0,0,1],deactivated:0}
+      }},
+      {date:'15-Jul-2026',units:{
+        'Unit A':{added:[2,1,1],deactivated:2},'Unit B':{added:[2,1,1],deactivated:3},
+        'Unit C':{added:[1,2,1],deactivated:1},'Unit D':{added:[1,1,0],deactivated:2}
+      }},
+      {date:'15-Aug-2026',units:{
+        'Unit A':{added:[2,2,1],deactivated:2},'Unit B':{added:[2,1,1],deactivated:2},
+        'Unit C':{added:[2,2,1],deactivated:3},'Unit D':{added:[2,1,1],deactivated:2}
+      }},
+      {date:'15-Sep-2026',units:{
+        'Unit A':{added:[2,2,1],deactivated:2},'Unit B':{added:[2,2,1],deactivated:1},
+        'Unit C':{added:[2,1,0],deactivated:2},'Unit D':{added:[1,1,1],deactivated:2}
+      }},
+      {date:'15-Oct-2026',units:{
+        'Unit A':{added:[2,1,0],deactivated:3},'Unit B':{added:[2,1,1],deactivated:2},
+        'Unit C':{added:[2,1,1],deactivated:2},'Unit D':{added:[1,2,2],deactivated:3}
+      }}
+    ];
+    let unitMetric='km';
+    let modelMetric='km';
+    let rankMetric='hours';
+    const formatCompact=n=>n>=1000000?(n/1000000).toFixed(2)+'M':n>=10000?(n/1000).toFixed(1)+'K':n.toLocaleString();
+    function getUnitUtilizationRows(unit,metric,from='25-Jun-2026',to='25-Oct-2026'){
+      const factor=getPeriodActivityFactor(from,to);
+      return utilizationData[unit][metric].map(([name,value])=>[name,Number((value*factor).toFixed(metric==='km'?0:1))]);
+    }
+    function renderUnitUtilization(){
+      const unit=document.getElementById('unit').value,from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value,items=getUnitUtilizationRows(unit,unitMetric,from,to),max=Math.max(...items.map(x=>x[1]),0)||1;
+      const labels={km:['completed-mission kilometres','km'],missions:['completed missions','missions'],hours:['mission hours','hrs']};
+      document.getElementById('unitUtilizationTitle').textContent=unit==='All Units'?'Unit Utilization':'Utilization by Make — '+unit;
+      document.getElementById('unitUtilizationSubtitle').textContent=labels[unitMetric][0]+' per average active vehicle';
+      document.getElementById('unitBars').innerHTML=items.map(([name,value])=>`<div class="bar-row"><span class="bar-name">${name}</span><div class="track"><div class="fill" style="width:${(value/max*100).toFixed(0)}%"></div></div><span class="bar-val">${value.toLocaleString()} ${labels[unitMetric][1]}</span></div>`).join('');
+      const hasActivity=items.some(item=>item[1]>0);
+      document.getElementById('unitInsight').innerHTML=!hasActivity?'<strong style="color:#294864">Management signal:</strong> No completed mission activity in this range.':unit==='All Units'?'<strong style="color:#294864">Management signal:</strong> Unit D has the lowest average utilization and the highest unused-fleet share.':'<strong style="color:#294864">Management signal:</strong> Compare makes within '+unit+' to identify allocation imbalance.';
+    }
+    function getDriverRejectionBreakdown(unit,from='25-Jun-2026',to='25-Oct-2026'){
+      const start=parseReportDate(from),end=parseReportDate(to),rangeValid=Boolean(start&&end&&end>=start);
+      if(!rangeValid) return {rangeValid:false,total:0,segments:[]};
+      const conditions=(rejectionConditionData[unit]||[]).map(item=>({...item,count:getDatedSupportValue(item.count,start,end)})).filter(item=>item.count>0).sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name));
+      const total=conditions.reduce((sum,item)=>sum+item.count,0);
+      const top=conditions.slice(0,5).map(item=>({name:item.name,count:item.count}));
+      const otherCount=conditions.slice(5).reduce((sum,item)=>sum+item.count,0);
+      if(otherCount>0) top.push({name:'Others',count:otherCount});
+      return {rangeValid:true,total,segments:top.map(item=>({...item,percentage:total?Number((item.count/total*100).toFixed(1)):0}))};
+    }
+    function getDriverRejectionSummary(unit,from='25-Jun-2026',to='25-Oct-2026'){
+      const start=parseReportDate(from),end=parseReportDate(to),rangeValid=Boolean(start&&end&&end>=start),data=dashboardData[unit];
+      if(!rangeValid) return {rangeValid:false,events:0,vehicles:0,affectedMissions:0};
+      const events=getDatedSupportValue(data.rejections,start,end);
+      return {rangeValid:true,events,vehicles:getDatedSupportValue(data.rejectedVehicles,start,end),affectedMissions:getDatedSupportValue(data.affectedMissions,start,end)};
+    }
+    function renderRejections(unit,from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value){
+      const data=getDriverRejectionBreakdown(unit,from,to),target=document.getElementById('rejectionReasons');
+      if(!data.total){
+        target.innerHTML=`<div class="rejection-empty">${data.rangeValid?'No rejection conditions in this range.':'Enter valid From and To dates in DD-MMM-YYYY format.'}</div>`;
+        return;
+      }
+      const colors=['#d64f61','#ef7d67','#f2a65a','#d6b34b','#8f73d8','#7b8798'];
+      let cursor=0;
+      const stops=data.segments.map((segment,index)=>{
+        const start=cursor,end=index===data.segments.length-1?100:cursor+segment.percentage;
+        cursor=end;
+        return `${colors[index]} ${start}% ${end}%`;
+      });
+      const summary=data.segments.map(segment=>`${segment.name}: ${segment.count}, ${segment.percentage}%`).join('; ');
+      target.innerHTML=`<div class="rejection-breakdown"><div class="rejection-donut" role="img" aria-label="${summary}" style="background:conic-gradient(${stops.join(',')})"><div class="donut-center"><b>${data.total.toLocaleString()}</b><span>Condition occurrences</span></div></div><div class="rejection-legend">${data.segments.map((segment,index)=>`<div class="rejection-legend-row"><i class="legend-dot" style="background:${colors[index]}"></i><span class="legend-name" title="${segment.name}">${segment.name}</span><span class="legend-value">${segment.count} · ${segment.percentage.toFixed(1)}%</span></div>`).join('')}</div></div>`;
+    }
+    function renderVehicleDetails(unit){
+      document.querySelectorAll('.rank .vehicle').forEach((el,i)=>el.textContent=rankingVehicles[unit][i]);
+      document.getElementById('candidateRows').innerHTML=candidateData[unit].map(row=>`<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td><span class="pill">${row[4]}</span></td></tr>`).join('');
+    }
+    function getUtilizationConcentration(unit,metric){
+      const data=concentrationData[unit], shares=data[metric];
+      return {eligible:data.eligible,top10Share:shares[0],top20Share:shares[1],remaining80Share:100-shares[1],top20Vehicles:Math.ceil(data.eligible*.2)};
+    }
+    function getFleetUsageDistribution(unit,metric,from='25-Jun-2026',to='25-Oct-2026'){
+      if(getPeriodActivityFactor(from,to)===0){
+        const eligible=concentrationData[unit].eligible;
+        return {eligible,highestUsedCount:0,otherCount:eligible,highestUsedShare:0,otherShare:0,top10Vehicles:0,top10Share:0,hasActivity:false,insight:'No completed mission activity in the selected range.',highestUsedLabel:'No utilized vehicles',otherLabel:`Eligible fleet · ${eligible} vehicles`,top10Insight:'No top-use concentration to report.',accessibleSummary:'No completed mission activity in the selected range.'};
+      }
+      const concentration=getUtilizationConcentration(unit,metric);
+      const wording={
+        hours:{verb:'generated',activity:'all mission hours'},
+        km:{verb:'travelled',activity:'the total kilometres'},
+        missions:{verb:'completed',activity:'all missions'}
+      }[metric];
+      const otherCount=concentration.eligible-concentration.top20Vehicles;
+      const top10Vehicles=Math.ceil(concentration.eligible*.1);
+      return {
+        eligible:concentration.eligible,
+        highestUsedCount:concentration.top20Vehicles,
+        otherCount,
+        highestUsedShare:concentration.top20Share,
+        otherShare:concentration.remaining80Share,
+        top10Vehicles,
+        top10Share:concentration.top10Share,
+        insight:`The highest-used 20% — ${concentration.top20Vehicles} vehicles — ${wording.verb} ${concentration.top20Share}% of ${wording.activity}.`,
+        highestUsedLabel:`Highest-used 20% · ${concentration.top20Vehicles} vehicles`,
+        otherLabel:`Other 80% · ${otherCount} vehicles`,
+        top10Insight:`Highest-used 10%: ${top10Vehicles} vehicles ${wording.verb} ${concentration.top10Share}% of ${wording.activity}.`,
+        accessibleSummary:`Highest-used 20%, ${concentration.top20Vehicles} vehicles, ${wording.verb} ${concentration.top20Share}% of ${wording.activity}; other 80%, ${otherCount} vehicles, ${wording.verb} ${concentration.remaining80Share}%.`
+      };
+    }
+    function renderConcentration(unit,from='25-Jun-2026',to='25-Oct-2026'){
+      const data=getFleetUsageDistribution(unit,rankMetric,from,to);
+      document.getElementById('concentrationScope').textContent=`Based on ${data.eligible.toLocaleString()} vehicles active during the selected period`;
+      document.getElementById('concentrationStatement').textContent=data.insight;
+      document.getElementById('highestUsedLabel').textContent=data.highestUsedLabel;
+      document.getElementById('otherVehiclesLabel').textContent=data.otherLabel;
+      const top=document.getElementById('concentrationTop'), rest=document.getElementById('concentrationRest');
+      top.style.width=data.highestUsedShare+'%'; top.textContent=data.highestUsedShare+'%';
+      rest.style.width=data.otherShare+'%'; rest.textContent=data.otherShare+'%';
+      document.getElementById('top10Insight').textContent=data.top10Insight;
+      document.getElementById('concentrationBar').setAttribute('aria-label',data.accessibleSummary);
+    }
+    function getModelActivityRows(unit,metric,from='25-Jun-2026',to='25-Oct-2026'){
+      const start=parseReportDate(from),end=parseReportDate(to),rangeValid=Boolean(start&&end&&end>=start);
+      if(!rangeValid) return [];
+      const factor=getPeriodActivityFactor(from,to);
+      if(metric==='unused'){
+        return modelData[unit].filter(model=>model.vehicles>0).map(model=>({
+          name:model.name,
+          vehicles:model.vehicles,
+          unused:Math.min(model.vehicles,Math.round(model.vehicles-(model.vehicles-model.unused)*factor))
+        })).map(model=>({
+          ...model,
+          exactRate:model.unused/model.vehicles*100,
+          rate:Number((model.unused/model.vehicles*100).toFixed(1))
+        })).sort((a,b)=>b.exactRate-a.exactRate||b.unused-a.unused||a.name.localeCompare(b.name));
+      }
+      return modelData[unit].map(model=>({
+        name:model.name,
+        vehicles:model.vehicles,
+        average:model[metric]*factor,
+        total:Math.round(model[metric]*model.vehicles*factor)
+      })).sort((a,b)=>b.total-a.total);
+    }
+    function parseReportDate(value){
+      const match=/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/.exec(value||'');
+      const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+      if(!match||months[match[2]]===undefined) return null;
+      const date=new Date(Date.UTC(Number(match[3]),months[match[2]],Number(match[1])));
+      return date.getUTCDate()===Number(match[1])?date:null;
+    }
+    function getFleetMovement(unit='All Units',from='25-Jun-2026',to='25-Oct-2026'){
+      const start=parseReportDate(from),end=parseReportDate(to),rangeValid=Boolean(start&&end&&end>=start);
+      if(!rangeValid) return {rangeValid:false,months:[],totals:{added:0,deactivated:0}};
+      const labels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const months=fleetLifecycleData.filter(item=>{
+        const date=parseReportDate(item.date);
+        return date>=start&&date<=end;
+      }).map(item=>{
+        const selectedUnits=unit==='All Units'?Object.values(item.units):[item.units[unit]].filter(Boolean);
+        const summary=selectedUnits.reduce((total,current)=>({
+          added:total.added+current.added.reduce((sum,value)=>sum+value,0),
+          deactivated:total.deactivated+current.deactivated
+        }),{added:0,deactivated:0});
+        const date=parseReportDate(item.date);
+        return {label:labels[date.getUTCMonth()],date:item.date,...summary};
+      }).filter(item=>item.added||item.deactivated);
+      const totals=months.reduce((sum,item)=>({added:sum.added+item.added,deactivated:sum.deactivated+item.deactivated}),{added:0,deactivated:0});
+      return {rangeValid:true,months,totals};
+    }
+    function getFleetLocation(unit='All Units',from='25-Jun-2026',to='25-Oct-2026'){
+      const start=parseReportDate(from),end=parseReportDate(to);
+      const first=parseReportDate('25-Jun-2026'),latest=parseReportDate('25-Oct-2026');
+      if(!start||!end||end<start) return {valid:false,message:'Enter valid From and To dates in DD-MMM-YYYY format.'};
+      if(end<first||end>latest) return {valid:false,message:'Location snapshot available from 25-Jun through 25-Oct-2026 in this mockup.'};
+      const allRows=supportUnits.map(name=>{
+        const later=fleetLifecycleData.filter(event=>parseReportDate(event.date)>end).reduce((sum,event)=>{
+          const changes=event.units[name];
+          return sum+changes.added.reduce((total,count)=>total+count,0)-changes.deactivated;
+        },0);
+        return {name,count:dashboardData[name].fleet[0]-later};
+      });
+      const total=allRows.reduce((sum,row)=>sum+row.count,0);
+      return {valid:true,total,allRows,rows:unit==='All Units'?allRows:allRows.filter(row=>row.name===unit)};
+    }
+    function renderFleetLocation(unit,from,to){
+      const data=getFleetLocation(unit,from,to);
+      const rows=document.getElementById('fleetLocationRows'),summary=document.getElementById('fleetLocationSummary');
+      if(!data.valid){
+        rows.innerHTML=`<div class="fleet-location-empty">${data.message}</div>`;
+        rows.setAttribute('aria-label',data.message);
+        summary.textContent='';
+        return;
+      }
+      const max=Math.max(...data.allRows.map(row=>row.count),1);
+      rows.innerHTML=data.rows.map(row=>{
+        const share=data.total?row.count/data.total*100:0;
+        return `<div class="fleet-location-row"><strong>${row.name}</strong><div class="fleet-location-track"><div class="fleet-location-fill" style="width:${(row.count/max*100).toFixed(1)}%"></div></div><span class="fleet-location-value">${row.count.toLocaleString()} <small>· ${share.toFixed(1)}%</small></span></div>`;
+      }).join('');
+      rows.setAttribute('aria-label',data.rows.map(row=>`${row.name}: ${row.count} of ${data.total} active vehicles, ${(row.count/data.total*100).toFixed(1)} percent`).join('; '));
+      summary.textContent=unit==='All Units'
+        ?`As of ${to}: ${data.total.toLocaleString()} active vehicles by owning unit`
+        :`As of ${to}: ${data.rows[0].count.toLocaleString()} in ${unit} · ${data.total.toLocaleString()} across all units`;
+    }
+    function setFleetView(view){
+      const location=view==='location';
+      document.getElementById('fleetLocationView').hidden=!location;
+      document.getElementById('fleetMovementView').hidden=location;
+      document.getElementById('locationTab').classList.toggle('active',location);
+      document.getElementById('movementTab').classList.toggle('active',!location);
+      document.getElementById('locationTab').setAttribute('aria-selected',String(location));
+      document.getElementById('movementTab').setAttribute('aria-selected',String(!location));
+      document.getElementById('fleetViewSubtitle').textContent=location
+        ?'Active vehicles by owning unit as of report end date'
+        :'Vehicle lifecycle events by month';
+    }
+    function getVehiclesAdded(unit='All Units',from='25-Jun-2026',to='25-Oct-2026'){
+      const start=parseReportDate(from),end=parseReportDate(to),rangeValid=Boolean(start&&end&&end>=start);
+      if(!rangeValid) return {rangeValid:false,total:0,sedan:0,suv:0,peopleMovers:0};
+      const result=fleetLifecycleData.filter(item=>{
+        const date=parseReportDate(item.date);
+        return date>=start&&date<=end;
+      }).reduce((total,item)=>{
+        const selectedUnits=unit==='All Units'?Object.values(item.units):[item.units[unit]].filter(Boolean);
+        selectedUnits.forEach(current=>{total.sedan+=current.added[0];total.suv+=current.added[1];total.peopleMovers+=current.added[2];});
+        return total;
+      },{sedan:0,suv:0,peopleMovers:0});
+      return {rangeValid:true,total:result.sedan+result.suv+result.peopleMovers,...result};
+    }
+    function renderFleetMovement(unit,from,to){
+      const data=getFleetMovement(unit,from,to),chart=document.getElementById('fleetMovementChart'),summary=document.getElementById('fleetMovementSummary');
+      if(!data.months.length){
+        chart.innerHTML=`<div class="movement-empty">${data.rangeValid?'No fleet movement events in this range.':'Enter valid From and To dates in DD-MMM-YYYY format.'}</div>`;
+        chart.setAttribute('aria-label','No fleet movement events in this range');
+        summary.textContent='';
+        return;
+      }
+      const max=Math.max(...data.months.flatMap(month=>[month.added,month.deactivated]),1);
+      chart.innerHTML=data.months.map(month=>`<div class="movement-month"><div class="movement-bars"><i class="movement-bar added" title="${month.label}: ${month.added} added" style="height:${(month.added/max*100).toFixed(0)}%"><span>${month.added}</span></i><i class="movement-bar deactivated" title="${month.label}: ${month.deactivated} deactivated" style="height:${(month.deactivated/max*100).toFixed(0)}%"><span>${month.deactivated}</span></i></div><span>${month.label}</span></div>`).join('');
+      chart.setAttribute('aria-label',`Added ${data.totals.added}; deactivated ${data.totals.deactivated} vehicles during the selected period`);
+      summary.textContent=`Selected period: ${data.totals.added.toLocaleString()} added · ${data.totals.deactivated.toLocaleString()} deactivated`;
+    }
+    function allocateBucketTotals(total){
+      let allocated=0;
+      return supportDateBuckets.map((bucket,index)=>{
+        const value=index===supportDateBuckets.length-1?total-allocated:Math.round(total*bucket.share);
+        allocated+=value;
+        return value;
+      });
+    }
+    function getDatedSupportValue(total,start,end){
+      const bucketTotals=allocateBucketTotals(total);
+      return supportDateBuckets.reduce((sum,bucket,index)=>{
+        const bucketStart=parseReportDate(bucket.from),bucketEnd=parseReportDate(bucket.to);
+        const overlapStart=start>bucketStart?start:bucketStart;
+        const overlapEnd=end<bucketEnd?end:bucketEnd;
+        if(overlapStart>overlapEnd) return sum;
+        const bucketDays=Math.round((bucketEnd-bucketStart)/86400000)+1;
+        const startOffset=Math.round((overlapStart-bucketStart)/86400000);
+        const endOffset=Math.round((overlapEnd-bucketStart)/86400000);
+        const throughEnd=Math.floor((endOffset+1)*bucketTotals[index]/bucketDays);
+        const beforeStart=Math.floor(startOffset*bucketTotals[index]/bucketDays);
+        return sum+throughEnd-beforeStart;
+      },0);
+    }
+    function getPeriodActivityFactor(from='25-Jun-2026',to='25-Oct-2026'){
+      const start=parseReportDate(from),end=parseReportDate(to);
+      if(!start||!end||end<start) return 0;
+      return getDatedSupportValue(1000,start,end)/1000;
+    }
+    function getUnusedFleetSummary(unit='All Units',from='25-Jun-2026',to='25-Oct-2026'){
+      const start=parseReportDate(from),end=parseReportDate(to),rangeValid=Boolean(start&&end&&end>=start),data=dashboardData[unit];
+      if(!rangeValid) return {rangeValid:false,count:0,rate:0};
+      const factor=getPeriodActivityFactor(from,to);
+      const count=Math.min(data.fleet[0],Math.round(data.fleet[0]-(data.fleet[0]-data.unused)*factor));
+      return {rangeValid:true,count,rate:Number((count/data.fleet[0]*100).toFixed(1))};
+    }
+    function getRankingMetricValues(metric,from='25-Jun-2026',to='25-Oct-2026'){
+      const factor=getPeriodActivityFactor(from,to),source=rankingMetricData[metric];
+      return [...source.most,...source.least].map(value=>Math.round(value*factor));
+    }
+    function getInterUnitSupport(metric,unit='All Units',from='25-Jun-2026',to='25-Oct-2026'){
+      const source=interUnitData[metric];
+      const start=parseReportDate(from),end=parseReportDate(to),rangeValid=Boolean(start&&end&&end>=start);
+      const matrix=source.map(row=>row.map(value=>rangeValid?getDatedSupportValue(value,start,end):0));
+      const rowCross=matrix.map((row,i)=>row.reduce((sum,value,j)=>sum+(i===j?0:value),0));
+      const colCross=supportUnits.map((_,j)=>matrix.reduce((sum,row,i)=>sum+(i===j?0:row[j]),0));
+      const total=matrix.reduce((sum,row)=>sum+row.reduce((rowSum,value)=>rowSum+value,0),0);
+      const crossTotal=rowCross.reduce((sum,value)=>sum+value,0);
+      const borrowerIndex=rowCross.indexOf(Math.max(...rowCross));
+      const lenderIndex=colCross.indexOf(Math.max(...colCross));
+      let routeValue=-1,routeFrom='',routeTo='';
+      matrix.forEach((row,i)=>row.forEach((value,j)=>{
+        if(i!==j&&value>routeValue){routeValue=value;routeFrom=supportUnits[j];routeTo=supportUnits[i];}
+      }));
+      const result={
+        metric,matrix,total,crossTotal,rangeValid,
+        crossRate:total?Number((crossTotal/total*100).toFixed(1)):0,
+        largestBorrower:{unit:supportUnits[borrowerIndex],value:rowCross[borrowerIndex]},
+        largestLender:{unit:supportUnits[lenderIndex],value:colCross[lenderIndex]},
+        largestRoute:{from:routeFrom,to:routeTo,value:routeValue}
+      };
+      if(unit==='All Units') return result;
+      const index=supportUnits.indexOf(unit);
+      const own=matrix[index][index],borrowed=rowCross[index],supplied=colCross[index];
+      return {...result,unit,requested:own+borrowed,borrowed,supplied,own,dependencyRate:own+borrowed?Number((borrowed/(own+borrowed)*100).toFixed(1)):0,netSupport:supplied-borrowed};
+    }
+    function getInterUnitSupportRows(unit='All Units',from='25-Jun-2026',to='25-Oct-2026'){
+      const data=getInterUnitSupport('missions','All Units',from,to);
+      if(!data.rangeValid||data.total===0) return {rangeValid:data.rangeValid,rows:[],largestRouteText:''};
+      const rows=supportUnits.map((name,index)=>{
+        const borrowed=data.matrix[index].reduce((sum,value,column)=>sum+(column===index?0:value),0);
+        const supplied=data.matrix.reduce((sum,row,rowIndex)=>sum+(rowIndex===index?0:row[index]),0);
+        return {unit:name,borrowed,supplied,netSupport:supplied-borrowed};
+      }).filter(row=>unit==='All Units'||row.unit===unit);
+      if(!rows.some(row=>row.borrowed>0||row.supplied>0)) return {rangeValid:data.rangeValid,rows:[],largestRouteText:''};
+      let route=data.largestRoute;
+      if(unit!=='All Units'){
+        const selected=supportUnits.indexOf(unit);
+        route={from:'',to:'',value:-1};
+        data.matrix.forEach((row,requestingIndex)=>row.forEach((value,owningIndex)=>{
+          if(requestingIndex===owningIndex||(requestingIndex!==selected&&owningIndex!==selected)) return;
+          if(value>route.value) route={from:supportUnits[owningIndex],to:supportUnits[requestingIndex],value};
+        }));
+      }
+      return {
+        rangeValid:data.rangeValid,
+        rows,
+        largestRouteText:`${unit==='All Units'?'Largest route':'Main route'}: ${route.from} → ${route.to} · ${route.value.toLocaleString()} missions`
+      };
+    }
+    function renderInterUnitSupport(unit,from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value){
+      const data=getInterUnitSupportRows(unit,from,to),flow=document.getElementById('supportFlow'),insight=document.getElementById('supportInsight');
+      if(!data.rows.length){
+        flow.innerHTML=`<div class="support-empty">${data.rangeValid?'No completed inter-unit missions in this range.':'Enter valid From and To dates in DD-MMM-YYYY format.'}</div>`;
+        flow.setAttribute('aria-label','No inter-unit vehicle support data');
+        insight.textContent='';
+        return;
+      }
+      const max=Math.max(...data.rows.flatMap(row=>[row.borrowed,row.supplied]),1);
+      flow.innerHTML=data.rows.map(row=>{
+        const netLabel=row.netSupport>0?`Net lender ${row.netSupport.toLocaleString()}`:row.netSupport<0?`Net borrower ${Math.abs(row.netSupport).toLocaleString()}`:'Balanced';
+        return `<div class="support-flow-row"><div class="support-flow-unit"><b>${row.unit}</b><span>${netLabel}</span></div><div class="support-flow-chart"><span class="support-flow-number left">${row.borrowed.toLocaleString()}</span><div class="support-flow-track"><div class="support-flow-fill borrowed" style="width:${(row.borrowed/max*100).toFixed(0)}%"></div></div><i class="support-flow-axis"></i><div class="support-flow-track"><div class="support-flow-fill supplied" style="width:${(row.supplied/max*100).toFixed(0)}%"></div></div><span class="support-flow-number">${row.supplied.toLocaleString()}</span></div></div>`;
+      }).join('');
+      flow.setAttribute('aria-label',data.rows.map(row=>`${row.unit}: ${row.borrowed} missions borrowed, ${row.supplied} missions supplied`).join('; '));
+      insight.textContent=data.largestRouteText;
+    }
+    function renderModelUtilization(unit,from='25-Jun-2026',to='25-Oct-2026'){
+      if(modelMetric==='unused'){
+        const models=getModelActivityRows(unit,modelMetric,from,to), max=Math.max(0,...models.map(model=>model.rate))||1;
+        document.getElementById('modelUtilizationTitle').textContent='Unused Active Vehicles by Model';
+        document.getElementById('modelUtilizationSubtitle').textContent='Active vehicles with no completed mission during the selected period';
+        document.getElementById('modelUtilizationBars').setAttribute('aria-label','Unused active vehicle rate by model');
+        document.getElementById('modelUtilizationBars').innerHTML=models.map(model=>{
+          const tooltip=`${model.name}: ${model.unused} unused of ${model.vehicles} active vehicles; ${model.rate.toFixed(1)}% unused rate`;
+          return `<div class="model-row" title="${tooltip}"><div class="model-label"><strong>${model.name}</strong><span>${model.vehicles} active vehicles</span></div><div class="model-track"><div class="model-fill unused" style="width:${(model.rate/max*100).toFixed(0)}%"></div></div><div class="model-stats"><strong>${model.rate.toFixed(1)}%</strong><span>${model.unused} of ${model.vehicles} unused</span></div></div>`;
+        }).join('');
+        const lead=models[0];
+        document.getElementById('modelNotePrimary').textContent=lead?`${lead.name} has the highest unused rate at ${lead.rate.toFixed(1)}% (${lead.unused} of ${lead.vehicles} active vehicles).`:'No active vehicle-model data in the selected range.';
+        document.getElementById('modelNoteSecondary').textContent=`${models.length} models shown`;
+        return;
+      }
+      const config={km:{label:'completed-mission kilometres',unit:'km'},missions:{label:'completed missions',unit:'missions'},hours:{label:'mission hours',unit:'hrs'}}[modelMetric];
+      const models=getModelActivityRows(unit,modelMetric,from,to), max=Math.max(0,...models.map(model=>model.total))||1,totalActivity=models.reduce((sum,item)=>sum+item.total,0);
+      document.getElementById('modelUtilizationTitle').textContent='Fleet Activity by Vehicle Model';
+      document.getElementById('modelUtilizationSubtitle').textContent='Total '+config.label+' during the selected period';
+      document.getElementById('modelUtilizationBars').setAttribute('aria-label','Fleet activity by vehicle model');
+      document.getElementById('modelUtilizationBars').innerHTML=models.map(model=>{
+        const display=model.total.toLocaleString()+' '+config.unit;
+        const average=modelMetric==='km'?Math.round(model.average).toLocaleString()+' km':modelMetric==='missions'?model.average.toFixed(1)+' missions':model.average.toFixed(1)+' hrs';
+        const contribution=(totalActivity?model.total/totalActivity*100:0).toFixed(1)+'%';
+        const tooltip=`${model.name}: ${model.vehicles} active vehicles; ${display} total; ${average} per active vehicle; ${contribution} of displayed-model activity`;
+        return `<div class="model-row" title="${tooltip}"><div class="model-label"><strong>${model.name}</strong><span>${model.vehicles} active vehicles</span></div><div class="model-track"><div class="model-fill" style="width:${(model.total/max*100).toFixed(0)}%"></div></div><div class="model-stats"><strong>${display}</strong><span>${contribution} of shown activity</span></div></div>`;
+      }).join('');
+      const lead=models[0],leadContribution=lead&&totalActivity?(lead.total/totalActivity*100).toFixed(1):'0.0';
+      document.getElementById('modelNotePrimary').textContent=totalActivity&&lead?`${lead.name} leads with ${lead.total.toLocaleString()} ${config.unit}, contributing ${leadContribution}% of displayed-model activity.`:'No completed vehicle-model activity in the selected range.';
+      document.getElementById('modelNoteSecondary').textContent=`${models.length} models shown · hover for average`;
+    }
+    function renderRankingMetricValues(){
+      const from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value,values=getRankingMetricValues(rankMetric,from,to),suffix={hours:'h',km:'km',missions:'missions'}[rankMetric];
+      document.querySelectorAll('.rank .metric').forEach((element,index)=>element.textContent=values[index].toLocaleString()+' '+suffix);
+    }
+    function applyFilters(){
+      const u=document.getElementById('unit').value, from=document.getElementById('fromDate').value, to=document.getElementById('toDate').value, d=dashboardData[u];
+      const missionSupport=getInterUnitSupport('missions',u,from,to),kmSupport=getInterUnitSupport('km',u,from,to),hoursSupport=getInterUnitSupport('hours',u,from,to);
+      const rejectionSummary=getDriverRejectionSummary(u,from,to),vehiclesAdded=getVehiclesAdded(u,from,to),unusedSummary=getUnusedFleetSummary(u,from,to);
+      const missions=u==='All Units'?missionSupport.total:missionSupport.requested;
+      const km=u==='All Units'?kmSupport.total:kmSupport.requested;
+      const hours=u==='All Units'?hoursSupport.total:hoursSupport.requested;
+      document.getElementById('overviewDate').textContent='As of '+to;
+      ['fleetTotal','fleetAvailable','fleetOnMission','fleetUnavailable'].forEach((id,i)=>document.getElementById(id).textContent=d.fleet[i].toLocaleString());
+      document.getElementById('vehiclesAdded').textContent=vehiclesAdded.total.toLocaleString();
+      document.getElementById('addedSedan').textContent=vehiclesAdded.sedan.toLocaleString();
+      document.getElementById('addedSuv').textContent=vehiclesAdded.suv.toLocaleString();
+      document.getElementById('addedPeopleMovers').textContent=vehiclesAdded.peopleMovers.toLocaleString();
+      document.getElementById('completedMissions').textContent=missions.toLocaleString();
+      document.getElementById('distanceTravelled').innerHTML=formatCompact(km)+' <small style="font-size:11px">km</small>';
+      document.getElementById('missionHours').innerHTML=formatCompact(hours)+' <small style="font-size:11px">hrs</small>';
+      document.getElementById('averageDistance').textContent=missions?Math.round(km/missions).toLocaleString()+' km average per mission':'No completed missions in range';
+      document.getElementById('averageHours').textContent=missions?(hours/missions).toFixed(1)+' hours average per mission':'No completed missions in range';
+      document.getElementById('unusedFleet').textContent=unusedSummary.count.toLocaleString();
+      document.getElementById('unusedRate').textContent=unusedSummary.rate.toFixed(1)+'%';
+      document.getElementById('driverRejections').textContent=rejectionSummary.events.toLocaleString();
+      document.getElementById('affectedRequestFoot').textContent=rejectionSummary.affectedMissions.toLocaleString();
+      document.getElementById('rejectionEvents').textContent=rejectionSummary.events.toLocaleString();
+      document.getElementById('rejectedVehicles').textContent=rejectionSummary.vehicles.toLocaleString();
+      document.getElementById('affectedMissions').textContent=rejectionSummary.affectedMissions.toLocaleString();
+      document.getElementById('ageTotal').textContent=d.fleet[0].toLocaleString();
+      d.age.forEach((value,i)=>{const pct=value/d.fleet[0]*100;document.getElementById('ageLabel'+i).textContent=value.toLocaleString()+' · '+pct.toFixed(1)+'%';document.getElementById('ageBar'+i).style.width=pct+'%';});
+      const trend=document.querySelector('.trend');
+      trend.style.opacity=missions?'1':'.18';
+      trend.setAttribute('aria-label',missions?'Mission activity trend':'No completed mission activity in the selected range');
+      renderUnitUtilization(); renderRejections(u,from,to); renderVehicleDetails(u); renderRankingMetricValues(); renderModelUtilization(u,from,to); renderConcentration(u,from,to); renderInterUnitSupport(u,from,to); renderFleetMovement(u,from,to); renderFleetLocation(u,from,to);
+    }
+    function activate(btn){btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+    function setUnitMetric(btn,type){activate(btn);unitMetric=type;renderUnitUtilization();}
+    function setModelMetric(btn,type){activate(btn);modelMetric=type;renderModelUtilization(document.getElementById('unit').value,document.getElementById('fromDate').value,document.getElementById('toDate').value);}
+    function setTrend(btn,type){activate(btn);const p=document.getElementById('trendPath');const paths={missions:'M55 122 C105 105,135 108,185 91 S275 68,325 83 S415 100,465 62 S555 58,605 44 S690 32,725 38',km:'M55 105 C120 90,150 116,185 98 S280 54,325 67 S410 84,465 73 S550 48,605 55 S690 28,725 46',hours:'M55 116 C115 112,145 93,185 87 S270 80,325 91 S410 72,465 58 S550 67,605 42 S690 48,725 31'};p.setAttribute('d',paths[type]);}
+    function setRank(btn,type){activate(btn);rankMetric=type;renderRankingMetricValues();renderConcentration(document.getElementById('unit').value,document.getElementById('fromDate').value,document.getElementById('toDate').value);}
+    applyFilters();
+  </script>
+</body>
+</html>
