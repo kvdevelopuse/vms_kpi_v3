@@ -273,6 +273,67 @@
       .rejection-breakdown { grid-template-columns:104px 1fr; }
       .rejection-donut { width:100px; height:100px; }
     }
+
+    /* Drill-down navigation; the original landing card grid is unchanged. */
+    .drill-entry-title { display:flex; align-items:center; justify-content:flex-start; flex:1; min-width:0; }
+    .drill-entry-title .heading-line { justify-content:flex-start; min-width:0; }
+    .drill-link { padding:3px; border:0; background:none; color:#21827b;
+      font:760 11px/1.2 Inter,"Segoe UI",Arial,sans-serif; white-space:nowrap; cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
+    .drill-link:hover,.drill-link:focus-visible { color:#146c67; outline:2px solid #80aef2; outline-offset:2px; }
+    .drill-link svg { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .head > .seg { flex:0 0 auto; }
+    .drill-entry-title h2 { white-space:nowrap; }
+    .card .seg { border:1px solid #e0e8ef; border-radius:9px; background:#f7f9fc; padding:3px; }
+    .card .seg button { border-radius:6px; padding:5px 9px; color:#8190a2; font-size:10px; font-weight:760; }
+    .card .seg button.active { color:#174f8f; background:#fff; box-shadow:0 1px 4px #2b476d1b; }
+    .kpi { box-shadow:none; }
+    .kpi::after { content:none; }
+    .fleet-overview { background:#e8f3f5; border-color:#d6ebee; box-shadow:none; }
+    .kpis > .kpi:nth-child(2) { background:#e8f3f5; border-color:#d6ebee; }
+    .kpis > .kpi:nth-child(3) { background:#eef1ff; border-color:#e2e6fa; }
+    .kpis > .kpi:nth-child(4) { background:#edf5fb; border-color:#dcebf4; }
+    .kpis > .kpi:nth-child(5) { background:#f4eefb; border-color:#e8ddf3; }
+    .kpis > .kpi:nth-child(6) { background:#eaf6ee; border-color:#d8ebdc; }
+    .kpis > .kpi:nth-child(7) { background:#fff1ec; border-color:#f7e3dc; }
+    @media (min-width:1500px) and (min-height:900px) {
+      .shell { height:100vh; min-height:0; overflow:hidden; }
+    }
+    .in-drill { height:100vh; overflow:hidden; }
+    .in-drill .shell { height:100vh; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+    .in-drill .kpis,.in-drill .dashboard,.in-drill .footer { display:none; }
+    .in-drill .filters select:disabled,.in-drill .filters input:disabled { color:#9aa7b6; background:#edf0f4; border-color:#dfe5eb; cursor:not-allowed; opacity:1; }
+    .in-drill .filters .field:not(:first-child) label { color:#a1acba; }
+    .in-drill .filters .apply { display:none; }
+    .drill-screen { display:flex; flex-direction:column; min-height:0; flex:1; padding:6px 0 0; }
+    .drill-screen[hidden] { display:none; }
+    .drill-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:11px; }
+    .drill-heading h2 { margin:0; font-size:20px; }
+    .drill-back { padding:0; margin:0 0 4px; border:0; background:none; color:#2f6fed; font-size:11px; font-weight:800; cursor:pointer; }
+    .drill-card { display:flex; flex-direction:column; flex:1; min-height:0; padding:16px; }
+    .drill-controls { display:flex; align-items:flex-end; justify-content:flex-start; gap:14px; padding:12px 16px;
+      margin-bottom:12px; border:1px solid #e5eaf1; border-radius:12px; background:#fff; }
+    .drill-controls:empty { display:none; }
+    .drill-control-label { display:flex; flex-direction:column; gap:5px; min-width:170px; color:#73829a; font-size:11px; font-weight:750; }
+    .drill-control-label select { width:100%; min-width:170px; height:37px; border:1px solid #dae4ee; border-radius:9px;
+      background:#fff; color:#354860; padding:0 12px; font:630 12px Inter,"Segoe UI",Arial,sans-serif; cursor:pointer; }
+    .drill-legend { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:13px; min-height:20px; margin:0 0 9px; color:#617289; font-size:10px; font-weight:750; }
+    .drill-legend span { display:inline-flex; align-items:center; gap:5px; }
+    .drill-legend i { width:9px; height:9px; border-radius:3px; display:inline-block; }
+    .drill-table td.colored { font-weight:800; }
+    .drill-caption { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:0 0 10px; color:#53657c; font-size:11px; }
+    .drill-caption strong { color:#29445f; font-size:12px; }
+    .drill-table-wrap { flex:1; min-height:0; overflow:auto; border:1px solid #e5eaf1; border-radius:8px; }
+    .drill-table { width:100%; border-collapse:collapse; font-size:11px; white-space:nowrap; }
+    .drill-table th { position:sticky; top:0; z-index:1; background:#f2f6fb; color:#607187; text-align:left; text-transform:uppercase; font-size:9px; letter-spacing:.4px; }
+    .drill-table th,.drill-table td { padding:9px 12px; border-bottom:1px solid #edf1f5; }
+    .drill-table tbody tr:nth-child(even) { background:#fbfcfe; }
+    .drill-table tbody tr:hover { background:#edf5ff; }
+    .drill-pager { display:flex; justify-content:flex-end; align-items:center; gap:9px; padding-top:10px; font-size:10px; color:#68778a; }
+    .drill-pager button { padding:5px 10px; border:1px solid #d5dfeb; border-radius:5px; background:#fff; color:#315e8f; font-weight:800; cursor:pointer; }
+    .drill-pager button:disabled { opacity:.4; cursor:default; }
+    .drill-demo-note { margin:8px 0 0; color:#8491a2; font-size:9px; }
+    @media(max-width:1200px) { .in-drill .shell { height:100dvh; } }
+    @media(max-width:720px) { .drill-entry-title h2 { white-space:normal; } .drill-heading h2 { font-size:16px; } }
   </style>
 </head>
 <body>
@@ -315,7 +376,7 @@
     <section class="dashboard">
       <div class="dashboard-row row-one">
       <article class="card" id="missionActivityCard">
-        <div class="head"><div><div class="heading-line"><h2>Mission Activity Trend</h2><button class="info-icon" aria-label="About Mission Activity Trend" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'mission')">i</button></div><p>Completed missions, kilometres and mission hours by month</p></div><div class="seg"><button class="active" onclick="setTrend(this,'missions')">Missions</button><button onclick="setTrend(this,'km')">KM</button><button onclick="setTrend(this,'hours')">Hours</button></div></div>
+        <div class="head"><div class="drill-entry-title"><div class="heading-line"><h2>Mission Activity Trend</h2><button class="info-icon" aria-label="About Mission Activity Trend" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'mission')">i</button></div></div><div class="seg"><button class="active" onclick="setTrend(this,'missions')">Missions</button><button onclick="setTrend(this,'km')">KM</button><button onclick="setTrend(this,'hours')">Hours</button></div><button class="drill-link" type="button" aria-label="Explore Mission Activity Trend" onclick="openDrilldown('mission')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <svg class="trend" viewBox="0 0 760 174" preserveAspectRatio="none" aria-label="Mission activity trend">
           <line class="gridline" x1="42" y1="25" x2="740" y2="25"/><line class="gridline" x1="42" y1="65" x2="740" y2="65"/><line class="gridline" x1="42" y1="105" x2="740" y2="105"/><line class="gridline" x1="42" y1="145" x2="740" y2="145"/>
           <text class="axis" x="6" y="28">1,400</text><text class="axis" x="6" y="68">1,200</text><text class="axis" x="6" y="108">1,000</text><text class="axis" x="17" y="148">800</text>
@@ -326,14 +387,14 @@
         </svg>
       </article>
       <article class="card">
-        <div class="head age-head"><div><div class="heading-line"><h2>Fleet Age Profile</h2><button class="info-icon" aria-label="About Fleet Age Profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'age')">i</button></div><p>Active vehicles as of report end date</p></div><div class="age-total"><b id="ageTotal">927</b><span>active vehicles</span></div><span class="link">View vehicles →</span></div>
+        <div class="head age-head"><div class="drill-entry-title"><div class="heading-line"><h2>Fleet Age Profile</h2><button class="info-icon" aria-label="About Fleet Age Profile" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'age')">i</button></div></div><button class="drill-link" type="button" aria-label="Explore Fleet Age Profile" onclick="openDrilldown('age')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <div class="age-row"><div class="age-meta"><strong>0–&lt;5 years</strong><span id="ageLabel0">486 · 52.4%</span></div><div class="age-track"><div class="age-fill" id="ageBar0" style="width:52.4%;background:#2f6fed"></div></div></div>
         <div class="age-row"><div class="age-meta"><strong>5–&lt;10 years</strong><span id="ageLabel1">318 · 34.3%</span></div><div class="age-track"><div class="age-fill" id="ageBar1" style="width:34.3%;background:#d99a28"></div></div></div>
         <div class="age-row"><div class="age-meta"><strong>10+ years</strong><span id="ageLabel2">123 · 13.3%</span></div><div class="age-track"><div class="age-fill" id="ageBar2" style="width:13.3%;background:#d45763"></div></div></div>
         <div class="age-note">Age bands describe fleet composition; they do not automatically classify a vehicle for replacement.</div>
       </article>
       <article class="card">
-        <div class="head"><div><div class="heading-line"><h2>Condition Review Candidates</h2><button class="info-icon" aria-label="About Condition Review Candidates" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'candidates')">i</button></div><p>Old age, high odometer or repeated driver rejection</p></div><span class="link">View all →</span></div>
+        <div class="head"><div class="drill-entry-title"><div class="heading-line"><h2>Condition Review Candidates</h2><button class="info-icon" aria-label="About Condition Review Candidates" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'candidates')">i</button></div></div><button class="drill-link" type="button" aria-label="Explore Condition Review Candidates" onclick="openDrilldown('candidates')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <table class="flag-table">
           <thead><tr><th>Vehicle</th><th>Unit</th><th>Age</th><th>Odometer</th><th>Rejects</th></tr></thead>
           <tbody id="candidateRows">
@@ -348,20 +409,20 @@
 
       <div class="dashboard-row row-two">
       <article class="card">
-        <div class="head"><div><div class="heading-line"><h2 id="unitUtilizationTitle">Unit Utilization</h2><button class="info-icon" aria-label="About Unit or Make Utilization" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'unit')">i</button></div><p id="unitUtilizationSubtitle">Completed-mission kilometres per average active vehicle</p></div><div class="seg"><button class="active" onclick="setUnitMetric(this,'km')">KM</button><button onclick="setUnitMetric(this,'missions')">Missions</button><button onclick="setUnitMetric(this,'hours')">Hours</button></div></div>
+        <div class="head"><div class="drill-entry-title"><div class="heading-line"><h2 id="unitUtilizationTitle">Unit Utilization</h2><button class="info-icon" aria-label="About Unit or Make Utilization" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'unit')">i</button></div></div><div class="seg"><button class="active" onclick="setUnitMetric(this,'km')">KM</button><button onclick="setUnitMetric(this,'missions')">Missions</button><button onclick="setUnitMetric(this,'hours')">Hours</button></div><button class="drill-link" type="button" aria-label="Explore Unit Utilization" onclick="openDrilldown('unit')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <div class="unit-bars" id="unitBars"></div>
         <div class="age-note" id="unitInsight" style="margin-top:18px"><strong style="color:#294864">Management signal:</strong> Unit D has the lowest average utilization and the highest unused-fleet share.</div>
       </article>
 
       <article class="card support-card">
-        <div class="head"><div><div class="heading-line"><h2>Inter-Unit Vehicle Support</h2><button class="info-icon" aria-label="About Inter-Unit Vehicle Support" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'support')">i</button></div></div></div>
+        <div class="head"><div class="drill-entry-title"><div class="heading-line"><h2>Inter-Unit Vehicle Support</h2><button class="info-icon" aria-label="About Inter-Unit Vehicle Support" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'support')">i</button></div></div><button class="drill-link" type="button" aria-label="Explore Inter-Unit Vehicle Support" onclick="openDrilldown('support')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <div class="support-flow-legend"><span><i style="background:#d99025"></i>Borrowed missions</span><span><i style="background:#2f6fed"></i>Supplied missions</span></div>
         <div id="supportFlow" class="support-flow" role="img" aria-label="Inter-unit vehicle support by completed mission count"></div>
         <div id="supportInsight" class="support-insight"></div>
       </article>
 
       <article class="card">
-        <div class="head"><div><div class="heading-line"><h2>Driver-Rejection Signals</h2><button class="info-icon" aria-label="About Driver-Rejection Signals" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'rejection')">i</button></div><p>Separate from completed-mission utilization</p></div><span class="link">Review history →</span></div>
+        <div class="head"><div class="drill-entry-title"><div class="heading-line"><h2>Driver-Rejection Signals</h2><button class="info-icon" aria-label="About Driver-Rejection Signals" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'rejection')">i</button></div></div><button class="drill-link" type="button" aria-label="Explore Driver-Rejection Signals" onclick="openDrilldown('rejection')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <div class="rejection-top">
           <div class="mini"><div class="v" id="rejectionEvents">73</div><div class="l">Events</div></div>
           <div class="mini"><div class="v" id="rejectedVehicles">48</div><div class="l">Vehicles</div></div>
@@ -373,13 +434,13 @@
 
       <div class="dashboard-row row-three">
       <article class="card">
-        <div class="head"><div><div class="heading-line"><h2 id="modelUtilizationTitle">Fleet Activity by Vehicle Model</h2><button class="info-icon" aria-label="About Fleet Activity by Vehicle Model" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'model')">i</button></div><p id="modelUtilizationSubtitle">Total completed-mission kilometres during the selected period</p></div><div class="seg"><button class="active" onclick="setModelMetric(this,'km')">KM</button><button onclick="setModelMetric(this,'missions')">Missions</button><button onclick="setModelMetric(this,'hours')">Hours</button><button onclick="setModelMetric(this,'unused')">Unused</button></div></div>
+        <div class="head"><div class="drill-entry-title"><div class="heading-line"><h2 id="modelUtilizationTitle">Fleet Activity by Vehicle Model</h2><button class="info-icon" aria-label="About Fleet Activity by Vehicle Model" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'model')">i</button></div></div><div class="seg"><button class="active" onclick="setModelMetric(this,'km')">KM</button><button onclick="setModelMetric(this,'missions')">Missions</button><button onclick="setModelMetric(this,'hours')">Hours</button><button onclick="setModelMetric(this,'unused')">Unused</button></div><button class="drill-link" type="button" aria-label="Explore Fleet Activity by Vehicle Model" onclick="openDrilldown('model')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <div class="model-bars" id="modelUtilizationBars" aria-label="Fleet activity by vehicle model"></div>
         <div class="model-note"><span id="modelNotePrimary">Top five models for the selected unit and reporting period</span><span id="modelNoteSecondary">Hover for vehicle count and average</span></div>
       </article>
 
       <article class="card">
-        <div class="head"><div><div class="heading-line"><h2>Vehicle Utilization Ranking</h2><button class="info-icon" aria-label="About Vehicle Utilization Ranking" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'ranking')">i</button></div><p>Only completed missions in the selected period</p></div><div class="seg"><button class="active" onclick="setRank(this,'hours')">Hours</button><button onclick="setRank(this,'km')">KM</button><button onclick="setRank(this,'missions')">Missions</button></div></div>
+        <div class="head"><div class="drill-entry-title"><div class="heading-line"><h2>Vehicle Utilization Ranking</h2><button class="info-icon" aria-label="About Vehicle Utilization Ranking" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'ranking')">i</button></div></div><div class="seg"><button class="active" onclick="setRank(this,'hours')">Hours</button><button onclick="setRank(this,'km')">KM</button><button onclick="setRank(this,'missions')">Missions</button></div><button class="drill-link" type="button" aria-label="Explore Vehicle Utilization Ranking" onclick="openDrilldown('ranking')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <div class="rank-wrap">
           <div><div class="rank-title">Most Utilized</div><div class="rank-list" id="mostList">
             <div class="rank"><span class="num">1</span><span class="vehicle">A-1048 · Toyota</span><span class="metric">614 h</span></div>
@@ -410,7 +471,7 @@
       </article>
 
       <article class="card">
-        <div class="head"><div><div class="heading-line"><h2>Fleet Location &amp; Movement</h2><button class="info-icon" aria-label="About Fleet Location and Fleet Movement" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'locationMovement')">i</button></div><p id="fleetViewSubtitle">Active vehicles by owning unit as of report end date</p></div><div class="seg fleet-view-tabs" role="tablist" aria-label="Fleet chart view"><button id="locationTab" class="active" role="tab" aria-selected="true" aria-controls="fleetLocationView" onclick="setFleetView('location')">Fleet Location</button><button id="movementTab" role="tab" aria-selected="false" aria-controls="fleetMovementView" onclick="setFleetView('movement')">Fleet Movement</button></div></div>
+        <div class="head"><div class="drill-entry-title"><div class="heading-line"><h2>Fleet Location &amp; Movement</h2><button class="info-icon" aria-label="About Fleet Location and Fleet Movement" aria-haspopup="dialog" aria-expanded="false" aria-controls="cardInfoPopover" onclick="showCardInfo(event,'locationMovement')">i</button></div></div><div class="seg fleet-view-tabs" role="tablist" aria-label="Fleet chart view"><button id="locationTab" class="active" role="tab" aria-selected="true" aria-controls="fleetLocationView" onclick="setFleetView('location')">Fleet Location</button><button id="movementTab" role="tab" aria-selected="false" aria-controls="fleetMovementView" onclick="setFleetView('movement')">Fleet Movement</button></div><button class="drill-link" type="button" aria-label="Explore Fleet Location & Movement" onclick="openDrilldown('locationMovement')">Explore <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
         <div id="fleetLocationView" class="fleet-card-view" role="tabpanel" aria-labelledby="locationTab">
           <div id="fleetLocationRows" class="fleet-location-rows" role="img" aria-label="Fleet count by owning unit"></div>
           <div id="fleetLocationSummary" class="movement-summary"></div>
@@ -425,6 +486,18 @@
     </section>
 
     <div class="footer"><span>* Partial month</span><span>Last refreshed: 25-Oct-2026 08:00</span></div>
+
+    <section id="drillScreen" class="drill-screen" aria-label="Fleet detail records" hidden>
+      <div class="drill-heading"><div><button class="drill-back" type="button" onclick="closeDrilldown()">← Back to Fleet Performance</button><h2 id="drillTitle"></h2></div></div>
+      <article class="card drill-card">
+        <div id="drillControls" class="drill-controls"></div>
+        <div id="drillLegend" class="drill-legend" aria-label="Data color legend"></div>
+        <div class="drill-caption"><strong id="drillCaption"></strong><span id="drillCount"></span></div>
+        <div class="drill-table-wrap"><table class="drill-table"><thead><tr id="drillColumns"></tr></thead><tbody id="drillRows"></tbody></table></div>
+        <div class="drill-pager"><span id="drillPageText"></span><button id="drillPrev" type="button" onclick="changeDrillPage(-1)">Previous</button><button id="drillNext" type="button" onclick="changeDrillPage(1)">Next</button></div>
+        <p class="drill-demo-note">Illustrative prototype records generated from the dashboard sample counts; connect source records for production.</p>
+      </article>
+    </section>
   </main>
   <aside id="cardInfoPopover" class="card-info-popover" role="dialog" aria-modal="false" aria-labelledby="cardInfoTitle" hidden></aside>
   <script>
@@ -622,7 +695,6 @@
       const unit=document.getElementById('unit').value,from=document.getElementById('fromDate').value,to=document.getElementById('toDate').value,items=getUnitUtilizationRows(unit,unitMetric,from,to),max=Math.max(...items.map(x=>x[1]),0)||1;
       const labels={km:['completed-mission kilometres','km'],missions:['completed missions','missions'],hours:['mission hours','hrs']};
       document.getElementById('unitUtilizationTitle').textContent=unit==='All Units'?'Unit Utilization':'Utilization by Make — '+unit;
-      document.getElementById('unitUtilizationSubtitle').textContent=labels[unitMetric][0]+' per average active vehicle';
       document.getElementById('unitBars').innerHTML=items.map(([name,value])=>`<div class="bar-row"><span class="bar-name">${name}</span><div class="track"><div class="fill" style="width:${(value/max*100).toFixed(0)}%"></div></div><span class="bar-val">${value.toLocaleString()} ${labels[unitMetric][1]}</span></div>`).join('');
       const hasActivity=items.some(item=>item[1]>0);
       document.getElementById('unitInsight').innerHTML=!hasActivity?'<strong style="color:#294864">Management signal:</strong> No completed mission activity in this range.':unit==='All Units'?'<strong style="color:#294864">Management signal:</strong> Unit D has the lowest average utilization and the highest unused-fleet share.':'<strong style="color:#294864">Management signal:</strong> Compare makes within '+unit+' to identify allocation imbalance.';
@@ -797,9 +869,6 @@
       document.getElementById('movementTab').classList.toggle('active',!location);
       document.getElementById('locationTab').setAttribute('aria-selected',String(location));
       document.getElementById('movementTab').setAttribute('aria-selected',String(!location));
-      document.getElementById('fleetViewSubtitle').textContent=location
-        ?'Active vehicles by owning unit as of report end date'
-        :'Vehicle lifecycle events by month';
     }
     function getVehiclesAdded(unit='All Units',from='25-Jun-2026',to='25-Oct-2026'){
       const start=parseReportDate(from),end=parseReportDate(to),rangeValid=Boolean(start&&end&&end>=start);
@@ -936,8 +1005,7 @@
       if(modelMetric==='unused'){
         const models=getModelActivityRows(unit,modelMetric,from,to), max=Math.max(0,...models.map(model=>model.rate))||1;
         document.getElementById('modelUtilizationTitle').textContent='Unused Active Vehicles by Model';
-        document.getElementById('modelUtilizationSubtitle').textContent='Active vehicles with no completed mission during the selected period';
-        document.getElementById('modelUtilizationBars').setAttribute('aria-label','Unused active vehicle rate by model');
+          document.getElementById('modelUtilizationBars').setAttribute('aria-label','Unused active vehicle rate by model');
         document.getElementById('modelUtilizationBars').innerHTML=models.map(model=>{
           const tooltip=`${model.name}: ${model.unused} unused of ${model.vehicles} active vehicles; ${model.rate.toFixed(1)}% unused rate`;
           return `<div class="model-row" title="${tooltip}"><div class="model-label"><strong>${model.name}</strong><span>${model.vehicles} active vehicles</span></div><div class="model-track"><div class="model-fill unused" style="width:${(model.rate/max*100).toFixed(0)}%"></div></div><div class="model-stats"><strong>${model.rate.toFixed(1)}%</strong><span>${model.unused} of ${model.vehicles} unused</span></div></div>`;
@@ -950,7 +1018,6 @@
       const config={km:{label:'completed-mission kilometres',unit:'km'},missions:{label:'completed missions',unit:'missions'},hours:{label:'mission hours',unit:'hrs'}}[modelMetric];
       const models=getModelActivityRows(unit,modelMetric,from,to), max=Math.max(0,...models.map(model=>model.total))||1,totalActivity=models.reduce((sum,item)=>sum+item.total,0);
       document.getElementById('modelUtilizationTitle').textContent='Fleet Activity by Vehicle Model';
-      document.getElementById('modelUtilizationSubtitle').textContent='Total '+config.label+' during the selected period';
       document.getElementById('modelUtilizationBars').setAttribute('aria-label','Fleet activity by vehicle model');
       document.getElementById('modelUtilizationBars').innerHTML=models.map(model=>{
         const display=model.total.toLocaleString()+' '+config.unit;
@@ -992,7 +1059,6 @@
       document.getElementById('rejectionEvents').textContent=rejectionSummary.events.toLocaleString();
       document.getElementById('rejectedVehicles').textContent=rejectionSummary.vehicles.toLocaleString();
       document.getElementById('affectedMissions').textContent=rejectionSummary.affectedMissions.toLocaleString();
-      document.getElementById('ageTotal').textContent=d.fleet[0].toLocaleString();
       d.age.forEach((value,i)=>{const pct=value/d.fleet[0]*100;document.getElementById('ageLabel'+i).textContent=value.toLocaleString()+' · '+pct.toFixed(1)+'%';document.getElementById('ageBar'+i).style.width=pct+'%';});
       const trend=document.querySelector('.trend');
       trend.style.opacity=missions?'1':'.18';
@@ -1005,6 +1071,293 @@
     function setTrend(btn,type){activate(btn);const p=document.getElementById('trendPath');const paths={missions:'M55 122 C105 105,135 108,185 91 S275 68,325 83 S415 100,465 62 S555 58,605 44 S690 32,725 38',km:'M55 105 C120 90,150 116,185 98 S280 54,325 67 S410 84,465 73 S550 48,605 55 S690 28,725 46',hours:'M55 116 C115 112,145 93,185 87 S270 80,325 91 S410 72,465 58 S550 67,605 42 S690 48,725 31'};p.setAttribute('d',paths[type]);}
     function setRank(btn,type){activate(btn);rankMetric=type;renderRankingMetricValues();renderConcentration(document.getElementById('unit').value,document.getElementById('fromDate').value,document.getElementById('toDate').value);}
     applyFilters();
+
+    // Drill-down state never changes the overview card controls.
+    const detailTitles={
+      mission:'Mission Activity Trend',age:'Fleet Age Profile',candidates:'Condition Review Candidates',
+      unit:'Unit Utilization',support:'Inter-Unit Vehicle Support',rejection:'Driver-Rejection Signals',model:'Fleet Activity by Vehicle Model',
+      ranking:'Vehicle Utilization Ranking',locationMovement:'Fleet Location & Movement'
+    };
+    const detailOptions={
+      mission:[['missions','Missions'],['km','KM'],['hours','Hours']],
+      unit:[['km','KM'],['missions','Missions'],['hours','Hours']],
+      model:[['km','KM'],['missions','Missions'],['hours','Hours'],['unused','Unused']],
+      ranking:[['hours','Hours'],['km','KM'],['missions','Missions']],
+      locationMovement:[['location','Fleet Location'],['movement','Fleet Movement']]
+    };
+    const detailUnits=['Unit A','Unit B','Unit C','Unit D'];
+    const detailMonths=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const detailModels=['Toyota Land Cruiser','Nissan Patrol','Mitsubishi Pajero','Toyota Camry','Ford Everest',
+      'Hyundai Sonata','Kia Sportage','Honda Accord','MG RX8','Isuzu MU-X'];
+    const detailCandidates=detailUnits.flatMap(unit=>candidateData[unit]);
+    const detailVehicleRegistry=detailUnits.flatMap((unit,ui)=>{
+      const prefix=unit.slice(-1),special=new Map();
+      candidateData[unit].forEach(row=>special.set(row[0],null));
+      rankingVehicles[unit].forEach(value=>{
+        const [id,model]=value.split(' · ');
+        special.set(id,model);
+      });
+      const ids=[...special.keys()];
+      for(let n=0;ids.length<dashboardData[unit].fleet[0];n++)ids.push(prefix+'-'+String(4000+n).padStart(4,'0'));
+      const bands=dashboardData[unit].age,models=modelData[unit].map(item=>item.name);
+      return ids.map((id,index)=>{
+        const age=index<bands[0]?3:index<bands[0]+bands[1]?7:12;
+        const providedModel=special.get(id);
+        const model=providedModel?(models.find(name=>name.startsWith(providedModel))||detailModels.find(name=>name.startsWith(providedModel))||providedModel):models[index%models.length];
+        return {id,unit,model,registered:'01-Jan-'+(2026-age),age};
+      });
+    });
+    const detailVehiclesByUnit=Object.fromEntries(detailUnits.map(unit=>[unit,detailVehicleRegistry.filter(v=>v.unit===unit)]));
+    const detailMissionRecords=(()=>{
+      const result=[];
+      detailUnits.forEach((requested,requestIndex)=>{
+        const total=dashboardData[requested].missions;
+        const monthCounts=allocateBucketTotals(total);
+        const ownerCounts=interUnitData.missions[requestIndex].slice();
+        const kmTotal=dashboardData[requested].km,hourMinutes=dashboardData[requested].hours*60;
+        let ordinal=0,sequence=0;
+        supportDateBuckets.forEach((bucket,bucketIndex)=>{
+          const first=parseReportDate(bucket.from),last=parseReportDate(bucket.to);
+          const dayCount=Math.round((last-first)/86400000)+1;
+          for(let i=0;i<monthCounts[bucketIndex];i++){
+            while(ownerCounts[ordinal%4]===0)ordinal++;
+            const ownerIndex=ordinal%4;
+            ownerCounts[ownerIndex]--;
+            const owner=detailUnits[ownerIndex],fleet=detailVehiclesByUnit[owner];
+            const vehicle=fleet[(sequence*11+requestIndex*7)%fleet.length];
+            const date=new Date(first.getTime()+Math.floor(i*dayCount/Math.max(monthCounts[bucketIndex],1))*86400000);
+            const km=Math.floor(kmTotal/total)+(sequence<kmTotal%total?1:0);
+            const minutes=Math.floor(hourMinutes/total)+(sequence<hourMinutes%total?1:0);
+            result.push({request:'REQ-'+String(100001+result.length),requested,owner,vehicle:vehicle.id,
+              date:date.toISOString().slice(0,10),km,hours:minutes/60});
+            ordinal++;sequence++;
+          }
+        });
+      });
+      return result;
+    })();
+    const detailRejectionRecords=detailUnits.flatMap((unit,ui)=>{
+      const total=dashboardData[unit].rejections,buckets=allocateBucketTotals(total),rows=[];
+      const reasons=rejectionConditionData[unit].map(item=>item.name);
+      buckets.forEach((count,bucketIndex)=>{
+        const first=parseReportDate(supportDateBuckets[bucketIndex].from),last=parseReportDate(supportDateBuckets[bucketIndex].to);
+        const dayCount=Math.round((last-first)/86400000)+1;
+        for(let i=0;i<count;i++){
+          const ordinal=rows.length,vehicle=detailVehiclesByUnit[unit][(ordinal*19+ui)%detailVehiclesByUnit[unit].length];
+          rows.push({id:'REJ-'+String(1001+ui*100+ordinal),unit,vehicle:vehicle.id,
+            request:'REQ-'+String(100001+ui*1200+ordinal),reason:reasons[ordinal%reasons.length],
+            date:new Date(first.getTime()+Math.floor(i*dayCount/Math.max(count,1))*86400000).toISOString().slice(0,10)});
+        }
+      });
+      return rows;
+    });
+    const detailMovementRecords=fleetLifecycleData.flatMap(event=>detailUnits.flatMap(unit=>{
+      const change=event.units[unit],rows=[];
+      change.added.forEach((count,type)=>{for(let n=0;n<count;n++)rows.push({date:event.date,unit,change:'Added',type:['Sedan','SUV','People Movers'][type]});});
+      for(let n=0;n<change.deactivated;n++)rows.push({date:event.date,unit,change:'Deactivated',type:'—'});
+      return rows;
+    }));
+    let detailState=null,detailPage=0,detailCurrentRows=[],detailCurrentColumns=[],detailDraft=null;
+    let appliedDetailContext={unit:document.getElementById('unit').value,from:document.getElementById('fromDate').value,to:document.getElementById('toDate').value};
+    const originalApplyFilters=applyFilters;
+    applyFilters=function(){
+      originalApplyFilters();
+      appliedDetailContext={unit:document.getElementById('unit').value,from:document.getElementById('fromDate').value,to:document.getElementById('toDate').value};
+    };
+    const detailDate=date=>{
+      const [year,month,day]=date.split('-').map(Number);
+      return String(day).padStart(2,'0')+'-'+detailMonths[month-1]+'-'+year;
+    };
+    const detailInRange=(iso,from,to)=>{
+      const d=new Date(iso+'T00:00:00Z'),start=parseReportDate(from),end=parseReportDate(to);
+      return Boolean(start&&end&&start<=end&&d>=start&&d<=end);
+    };
+    const detailDateIso=display=>{
+      const d=parseReportDate(display);
+      return d?d.toISOString().slice(0,10):'';
+    };
+    const detailMetricValue=(summary,metric)=>metric==='km'?summary.km:metric==='hours'?summary.hours:summary.missions;
+    function getLandingDetailMetric(card){
+      if(card==='unit')return unitMetric;
+      if(card==='model')return modelMetric;
+      if(card==='ranking')return rankMetric;
+      if(card==='locationMovement')return document.getElementById('movementTab').classList.contains('active')?'movement':'location';
+      if(card==='mission'){
+        const active=document.querySelector('#missionActivityCard .seg button.active');
+        return active?({Missions:'missions',KM:'km',Hours:'hours'}[active.textContent]||'missions'):'missions';
+      }
+      return '';
+    }
+    function openDrilldown(card){
+      if(!detailTitles[card])return;
+      closeCardInfo();
+      detailDraft={unit:document.getElementById('unit').value,from:document.getElementById('fromDate').value,to:document.getElementById('toDate').value};
+      detailState={card,metric:getLandingDetailMetric(card),context:{...appliedDetailContext}};
+      document.getElementById('unit').value=detailState.context.unit;
+      document.getElementById('fromDate').value=detailState.context.from;
+      document.getElementById('toDate').value=detailState.context.to;
+      document.body.classList.add('in-drill');
+      ['fromDate','toDate'].forEach(id=>document.getElementById(id).disabled=true);
+      document.getElementById('drillScreen').hidden=false;
+      document.getElementById('drillTitle').textContent=detailTitles[card];
+      detailPage=0;
+      renderDrilldown();
+    }
+    function closeDrilldown(){
+      document.getElementById('drillScreen').hidden=true;
+      document.body.classList.remove('in-drill');
+      ['fromDate','toDate'].forEach(id=>document.getElementById(id).disabled=false);
+      if(detailDraft){
+        document.getElementById('unit').value=detailDraft.unit;
+        document.getElementById('fromDate').value=detailDraft.from;
+        document.getElementById('toDate').value=detailDraft.to;
+      }
+      detailState=null;
+    }
+    function setDrillMetric(metric){
+      if(!detailState||!detailOptions[detailState.card]?.some(option=>option[0]===metric))return;
+      detailState.metric=metric;
+      detailPage=0;
+      renderDrilldown();
+    }
+    document.getElementById('unit').addEventListener('change',()=>{
+      if(!detailState)return;
+      detailState.context.unit=document.getElementById('unit').value;
+      detailPage=0;
+      renderDrilldown();
+    });
+    function renderDrillLegend(card,metric){
+      const items={
+        mission:[['#2f6fed',metric==='km'?'Completed kilometres':metric==='hours'?'Mission hours':'Completed missions']],
+        age:[['#2f6fed','0–<5 years'],['#d99a28','5–<10 years'],['#d45763','10+ years']],
+        candidates:[['#dc4c5b','Driver rejections']],
+        unit:[['#2f6fed',metric==='km'?'Completed kilometres':metric==='hours'?'Mission hours':'Completed missions']],
+        support:[['#d99025','Borrowed by requesting unit'],['#2f6fed','Supplied by owning unit']],
+        rejection:[['#d64f61','Driver rejection events']],
+        model:[metric==='unused'?['#d48a16','Unused vehicles']:['#0d9488','Completed mission activity']],
+        ranking:[['#355f8f','Selected utilization metric']],
+        locationMovement:metric==='movement'?[['#2f6fed','Added'],['#dc4c5b','Deactivated']]:[['#2f6fed','Active vehicles by owning unit']]
+      }[card]||[];
+      document.getElementById('drillLegend').innerHTML=items.map(([color,label])=>
+        '<span><i style="background:'+color+'"></i>'+label+'</span>').join('');
+    }
+    function getDetailVehicleRows(context){
+      const snapshot=getFleetLocation(context.unit,context.from,context.to);
+      if(!snapshot.valid)return [];
+      return snapshot.rows.flatMap(row=>detailVehiclesByUnit[row.name].slice(0,row.count));
+    }
+    function renderDrilldown(){
+      if(!detailState)return;
+      const {card,metric,context}=detailState,options=detailOptions[card]||[];
+      document.getElementById('drillControls').innerHTML=options.length?
+        '<label class="drill-control-label"><span>'+ (card==='locationMovement'?'View':'Measure') +
+        '</span><select aria-label="'+(card==='locationMovement'?'View':'Measure')+'" onchange="setDrillMetric(this.value)">'+
+        options.map(([value,label])=>'<option value="'+value+'"'+(metric===value?' selected':'')+'>'+label+'</option>').join('')+
+        '</select></label>':'';
+      renderDrillLegend(card,metric);
+      const missions=detailMissionRecords.filter(item=>(context.unit==='All Units'||item.requested===context.unit)&&
+        detailInRange(item.date,context.from,context.to));
+      const vehicles=getDetailVehicleRows(context),byVehicle=new Map();
+      missions.forEach(item=>{
+        const current=byVehicle.get(item.vehicle)||{missions:0,km:0,hours:0};
+        current.missions++;current.km+=item.km;current.hours+=item.hours;byVehicle.set(item.vehicle,current);
+      });
+      const valueFor=v=>byVehicle.get(v.id)||{missions:0,km:0,hours:0};
+      let columns=[],rows=[],caption='';
+      const num=n=>n.toLocaleString(undefined,{maximumFractionDigits:1});
+      if(card==='mission'){
+        columns=['Request','Completed','Requesting Unit','Vehicle','Owning Unit',metric==='km'?'KM':metric==='hours'?'Hours':'Missions'];
+        rows=missions.slice().sort((a,b)=>b.date.localeCompare(a.date)||a.request.localeCompare(b.request))
+          .map(item=>[item.request,detailDate(item.date),item.requested,item.vehicle,item.owner,
+            metric==='km'?num(item.km):metric==='hours'?num(item.hours):'1']);
+        caption='Completed mission records';
+      }else if(card==='age'){
+        columns=['Vehicle','Owning Unit','Model','Registration Date','Age Band'];
+        rows=vehicles.map(v=>[v.id,v.unit,v.model,v.registered,v.age<5?'0–<5 years':v.age<10?'5–<10 years':'10+ years']);
+        caption='Active vehicles as of '+context.to;
+      }else if(card==='candidates'){
+        columns=['Vehicle','Unit','Age','Odometer','Driver Rejections'];
+        rows=detailCandidates.filter(row=>context.unit==='All Units'||row[1]===context.unit)
+          .map(row=>[...row.slice(0,4),String(getDatedSupportValue(row[4],parseReportDate(context.from)||new Date(0),parseReportDate(context.to)||new Date(0)))]);
+        caption='Condition review candidate records';
+      }else if(card==='unit'){
+        columns=['Vehicle','Owning Unit','Make','Completed Missions','KM','Hours'];
+        rows=vehicles.map(v=>[v.id,v.unit,v.model.split(' ')[0],num(valueFor(v).missions),num(valueFor(v).km),num(valueFor(v).hours)])
+          .sort((a,b)=>Number(b[metric==='missions'?3:metric==='km'?4:5].replace(/,/g,''))-Number(a[metric==='missions'?3:metric==='km'?4:5].replace(/,/g,'')));
+        caption='Vehicle activity, ordered by '+({km:'KM',missions:'Missions',hours:'Hours'}[metric]);
+      }else if(card==='support'){
+        columns=['Request','Completed','Requesting Unit','Owning Unit','Vehicle','Mission KM','Mission Hours'];
+        rows=detailMissionRecords.filter(item=>item.owner!==item.requested&&
+          (context.unit==='All Units'||item.requested===context.unit||item.owner===context.unit)&&
+          detailInRange(item.date,context.from,context.to))
+          .sort((a,b)=>b.date.localeCompare(a.date)||a.request.localeCompare(b.request))
+          .map(item=>[item.request,detailDate(item.date),item.requested,item.owner,item.vehicle,num(item.km),num(item.hours)]);
+        caption='All cross-unit completed mission records';
+      }else if(card==='rejection'){
+        columns=['Event','Date','Vehicle','Unit','Request','Condition'];
+        rows=detailRejectionRecords.filter(item=>(context.unit==='All Units'||item.unit===context.unit)&&detailInRange(item.date,context.from,context.to))
+          .sort((a,b)=>b.date.localeCompare(a.date)).map(item=>[item.id,detailDate(item.date),item.vehicle,item.unit,item.request,item.reason]);
+        caption='Driver rejection events';
+      }else if(card==='model'){
+        columns=['Vehicle','Owning Unit','Model','Completed Missions','KM','Hours'];
+        rows=vehicles.filter(v=>metric!=='unused'||valueFor(v).missions===0).map(v=>[v.id,v.unit,v.model,
+          num(valueFor(v).missions),num(valueFor(v).km),num(valueFor(v).hours)]);
+        if(metric!=='unused')rows.sort((a,b)=>Number(b[metric==='missions'?3:metric==='km'?4:5].replace(/,/g,''))-Number(a[metric==='missions'?3:metric==='km'?4:5].replace(/,/g,'')));
+        caption=metric==='unused'?'Vehicles with no completed mission':'Vehicles by model, ordered by '+metric.toUpperCase();
+      }else if(card==='ranking'){
+        columns=['Rank','Vehicle','Model','Owning Unit','Completed Missions','KM','Hours'];
+        const sorted=vehicles.slice().sort((a,b)=>detailMetricValue(valueFor(b),metric)-detailMetricValue(valueFor(a),metric)||a.id.localeCompare(b.id));
+        rows=sorted.map((v,i)=>[String(i+1),v.id,v.model,v.unit,num(valueFor(v).missions),num(valueFor(v).km),num(valueFor(v).hours)]);
+        caption='All eligible vehicles ranked by '+({hours:'Hours',km:'KM',missions:'Missions'}[metric]);
+      }else if(metric==='movement'){
+        columns=['Date','Unit','Event','Vehicle Type'];
+        rows=detailMovementRecords.filter(item=>(context.unit==='All Units'||item.unit===context.unit)&&
+          detailInRange(detailDateIso(item.date),context.from,context.to))
+          .sort((a,b)=>detailDateIso(b.date).localeCompare(detailDateIso(a.date))).map(item=>[item.date,item.unit,item.change,item.type]);
+        caption='Fleet lifecycle events in the selected period';
+      }else{
+        columns=['Vehicle','Owning Unit','Model','Age Band'];
+        rows=vehicles.map(v=>[v.id,v.unit,v.model,v.age<5?'0–<5 years':v.age<10?'5–<10 years':'10+ years']);
+        caption='Active vehicles by owning unit as of '+context.to;
+      }
+      detailCurrentColumns=columns;detailCurrentRows=rows;
+      document.getElementById('drillCaption').textContent=caption;
+      document.getElementById('drillCount').textContent=rows.length.toLocaleString()+' records';
+      renderDrillPage();
+    }
+    function renderDrillPage(){
+      const size=50,total=detailCurrentRows.length,pages=Math.max(1,Math.ceil(total/size));
+      detailPage=Math.max(0,Math.min(detailPage,pages-1));
+      const colorFor=(values,index)=>{
+        const {card,metric}=detailState;
+        if(card==='age'&&index===4)return values[index].startsWith('0–')?'#2f6fed':values[index].startsWith('5–')?'#d99a28':'#d45763';
+        if(card==='support')return index===2?'#d99025':index===3?'#2f6fed':'';
+        if(card==='locationMovement'&&metric==='movement'&&index===2)return values[index]==='Added'?'#2f6fed':'#dc4c5b';
+        const target={mission:5,candidates:4,unit:metric==='missions'?3:metric==='km'?4:5,
+          rejection:5,model:metric==='missions'||metric==='unused'?3:metric==='km'?4:5,
+          ranking:metric==='missions'?4:metric==='km'?5:6,locationMovement:0}[card];
+        if(index!==target)return '';
+        return {mission:'#2f6fed',candidates:'#dc4c5b',unit:'#2f6fed',rejection:'#d64f61',
+          model:metric==='unused'?'#d48a16':'#0d9488',ranking:'#355f8f',locationMovement:'#2f6fed'}[card];
+      };
+      const cells=values=>values.map((value,index)=>{
+        const color=colorFor(values,index);
+        return '<td'+(color?' class="colored" style="color:'+color+'"':'')+'>'+String(value)+'</td>';
+      }).join('');
+      document.getElementById('drillColumns').innerHTML=detailCurrentColumns.map(value=>'<th scope="col">'+value+'</th>').join('');
+      document.getElementById('drillRows').innerHTML=total?detailCurrentRows.slice(detailPage*size,(detailPage+1)*size)
+        .map(values=>'<tr>'+cells(values)+'</tr>').join(''):
+        '<tr><td colspan="'+detailCurrentColumns.length+'">No records in the selected reporting period.</td></tr>';
+      document.getElementById('drillPageText').textContent=total?
+        (detailPage*size+1)+'–'+Math.min((detailPage+1)*size,total)+' of '+total.toLocaleString():'0 records';
+      document.getElementById('drillPrev').disabled=detailPage===0;
+      document.getElementById('drillNext').disabled=detailPage>=pages-1;
+    }
+    function changeDrillPage(direction){
+      detailPage+=direction;
+      renderDrillPage();
+      document.querySelector('.drill-table-wrap').scrollTop=0;
+    }
   </script>
 </body>
 </html>
